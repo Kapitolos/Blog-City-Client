@@ -1,0 +1,11 @@
+1. sign in is case sensitive.
+2. hashing....promise isn't finsihing before inserting.
+3. old posts are ugly at the start. It would be nice to have
+them cycle instead. One post at a time phasing to another.
+4. Users to comment on other users posts. 
+5. Browse other users posts.
+6. Search bar for users or posts?
+
+menu intersect observer is forcing visable.....
+Need to have the elment not even there to be triggered until
+button is clicked.
