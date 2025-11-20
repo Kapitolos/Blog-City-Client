@@ -9,6 +9,7 @@ import SignButton from './SignButton.js';
 import RegButton from './RegButton.js';
 import SearchBar from './searchbar';
 import StickyNavbar from './StickyNavbar.js';
+import ToastContainer from './components/ToastContainer.js';
 import './App.css';
 import React from 'react';
 
@@ -34,9 +35,25 @@ class App extends React.Component {
         posttitle: ''
       },
       posttext: "",
-      refreshUserPosts: false
+      refreshUserPosts: false,
+      toasts: []
     };
   }
+
+  // Toast notification methods
+  showToast = (message, type = 'info', duration = 5000) => {
+    const id = Date.now() + Math.random();
+    this.setState(prevState => ({
+      toasts: [...prevState.toasts, { id, message, type, duration }]
+    }));
+    return id;
+  };
+
+  removeToast = (id) => {
+    this.setState(prevState => ({
+      toasts: prevState.toasts.filter(toast => toast.id !== id)
+    }));
+  };
 
   signout = () => {
     this.setState({
@@ -62,7 +79,8 @@ class App extends React.Component {
       },
       isSignedIn: true,
       route: 'home'
-    })
+    });
+    this.showToast(`Welcome back, ${data.name}!`, 'success');
   }
 
   loadBlog = (data) => {
@@ -81,6 +99,8 @@ class App extends React.Component {
     setTimeout(() => {
       this.setState({ refreshUserPosts: false });
     }, 100);
+    
+    this.showToast('Blog post published successfully!', 'success');
   }
 
   loadAllBlog = (data) => {
@@ -91,6 +111,20 @@ class App extends React.Component {
     // Pass search results to AllBlogs component
     if (this.allBlogsRef && this.allBlogsRef.current) {
       this.allBlogsRef.current.handleSearchResults(results, searchTerm);
+    }
+  }
+
+  handlePostUpdated = (updatedPost) => {
+    // Refresh all blogs when a post is updated
+    if (this.allBlogsRef && this.allBlogsRef.current) {
+      this.allBlogsRef.current.allblogview();
+    }
+  }
+
+  handlePostDeleted = (postId) => {
+    // Refresh all blogs when a post is deleted
+    if (this.allBlogsRef && this.allBlogsRef.current) {
+      this.allBlogsRef.current.allblogview();
     }
   }
 
@@ -121,6 +155,11 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
+        <ToastContainer 
+          toasts={this.state.toasts}
+          removeToast={this.removeToast}
+        />
+        
         <StickyNavbar 
           isSignedIn={this.state.isSignedIn}
           user={this.state.user}
@@ -134,19 +173,32 @@ class App extends React.Component {
           {this.state.route === 'signin' ? (
             <div className="main-content centered">
               <div className="content-area">
-                <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+                <SignIn 
+                  loadUser={this.loadUser} 
+                  onRouteChange={this.onRouteChange}
+                  showToast={this.showToast}
+                />
               </div>
             </div>
           ) : this.state.route === 'register' ? (
             <div className="main-content centered">
               <div className="content-area">
-                <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+                <Register 
+                  loadUser={this.loadUser} 
+                  onRouteChange={this.onRouteChange}
+                  showToast={this.showToast}
+                />
               </div>
             </div>
           ) : this.state.route === 'home' ? (
             <div className="main-content">
               <div className="content-area">
-                <BlogWriter loadBlog={this.loadBlog} name={this.state.user.name} id={this.state.user.id} />
+                <BlogWriter 
+                  loadBlog={this.loadBlog} 
+                  name={this.state.user.name} 
+                  id={this.state.user.id}
+                  showToast={this.showToast}
+                />
                 
                 {/* Show current post if exists */}
                 {this.state.user.postbody && (
@@ -179,6 +231,9 @@ class App extends React.Component {
                     name={this.state.user.name} 
                     id={this.state.user.id}
                     refreshTrigger={this.state.refreshUserPosts}
+                    showToast={this.showToast}
+                    onPostUpdated={this.handlePostUpdated}
+                    onPostDeleted={this.handlePostDeleted}
                   />
                 </div>
               </div>
@@ -190,7 +245,9 @@ class App extends React.Component {
                 <AllBlogs 
                   ref={this.allBlogsRef}
                   loadAllBlog={this.loadAllBlog} 
-                  allblogs={this.state.allblogs} 
+                  allblogs={this.state.allblogs}
+                  userId={this.state.user.id}
+                  userName={this.state.user.name}
                 />
               </div>
             </div>

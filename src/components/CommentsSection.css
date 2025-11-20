@@ -1,0 +1,39 @@
+.comments-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e5e5;
+}
+
+.comments-section-header {
+  margin-bottom: 1.5rem;
+}
+
+.comments-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.comments-error {
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.comments-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6a6a6a;
+  font-size: 0.9rem;
+}
+
+.comments-loading p {
+  margin: 0;
+}
+
+

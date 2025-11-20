@@ -41,20 +41,42 @@ class Signin extends React.Component {
         password: this.state.signInPassword
       })
     })
-      .then(response => response.json())
+      .then(response => {
+        // Check if response is ok before parsing JSON
+        if (!response.ok) {
+          // Try to parse error message from response
+          return response.json().then(data => {
+            throw new Error(data.error || 'Invalid email or password');
+          }).catch(() => {
+            // If JSON parsing fails, throw a generic error
+            throw new Error(`Sign in failed: ${response.status} ${response.statusText}`);
+          });
+        }
+        // Response is ok, parse JSON
+        return response.json();
+      })
       .then(user => {
         this.setState({isLoading: false});
         if (user && user.id) {
-          this.props.loadUser(user)
+          this.props.loadUser(user);
           this.props.onRouteChange('home');
           console.log("This is from Sign In");
           console.log(user);
         } else {
-          this.setState({error: 'Invalid email or password'});
+          const errorMsg = 'Invalid email or password';
+          this.setState({error: errorMsg});
+          if (this.props.showToast) {
+            this.props.showToast(errorMsg, 'error');
+          }
         }
       })
       .catch(err => {
-        this.setState({isLoading: false, error: 'Connection error. Please try again.'});
+        this.setState({isLoading: false});
+        const errorMsg = err.message || 'Connection error. Please try again.';
+        this.setState({error: errorMsg});
+        if (this.props.showToast) {
+          this.props.showToast(errorMsg, 'error');
+        }
         console.error('Sign in error:', err);
       })
   }

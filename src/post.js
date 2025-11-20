@@ -1,5 +1,6 @@
 import React from 'react';
 import './post.css';
+import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 class Post extends React.Component {
   constructor(props) {
@@ -23,8 +24,8 @@ class Post extends React.Component {
               <span className="blog-post-author">by {name}</span>
             )}
             {created_at && (
-              <span className="blog-post-date">
-                {new Date(created_at).toLocaleDateString()}
+              <span className="blog-post-date" title={formatDate(created_at)}>
+                {formatRelativeTime(created_at)}
               </span>
             )}
           </div>

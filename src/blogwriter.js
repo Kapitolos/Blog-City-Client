@@ -1,5 +1,6 @@
 import React from 'react';
 import './blogwriter.css';
+import CategorySelector from './components/CategorySelector.js';
 
 class BlogWriter extends React.Component {
   constructor(props) {
@@ -9,7 +10,8 @@ class BlogWriter extends React.Component {
       posttitle: '',
       isPublishing: false,
       error: '',
-      success: false
+      success: false,
+      selectedCategories: []
     }
   }
 
@@ -59,7 +61,8 @@ class BlogWriter extends React.Component {
       name: this.props.name,
       postbody: this.state.postbody.trim(),
       posttitle: this.state.posttitle.trim(),
-      id: this.props.id
+      id: this.props.id,
+      category_ids: this.state.selectedCategories
     };
 
     console.log('Request body being sent:', requestBody);
@@ -93,10 +96,10 @@ class BlogWriter extends React.Component {
           } else {
             // Success
             this.setState({
-              success: true,
               postbody: '',
               posttitle: '',
-              isPublishing: false
+              isPublishing: false,
+              selectedCategories: []
             });
             
             // Clear the form fields
@@ -106,10 +109,10 @@ class BlogWriter extends React.Component {
             this.props.loadBlog(data);
             console.log('✅ Blog published successfully:', data);
             
-            // Clear success message after 5 seconds
-            setTimeout(() => {
-              this.setState({ success: false });
-            }, 5000);
+            // Show toast notification if available
+            if (this.props.showToast) {
+              this.props.showToast('Blog post published successfully!', 'success');
+            }
           }
         } else {
           console.error('Unexpected response format:', data);
@@ -129,7 +132,7 @@ class BlogWriter extends React.Component {
   }
 
   render() {
-    const { posttitle, postbody, isPublishing, error, success } = this.state;
+    const { posttitle, postbody, isPublishing, error } = this.state;
     const charCount = postbody.length;
     const titleCharCount = posttitle.length;
 
@@ -144,12 +147,6 @@ class BlogWriter extends React.Component {
           {error && (
             <div className="blog-error-message">
               {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="blog-success-message">
-              ✅ Blog post published successfully! Check your "Previous Posts" on the right.
             </div>
           )}
 
@@ -187,6 +184,14 @@ class BlogWriter extends React.Component {
                 maxLength={5000}
                 rows={12}
                 required
+              />
+            </div>
+
+            <div className="form-group">
+              <CategorySelector
+                selectedCategories={this.state.selectedCategories}
+                onChange={(categories) => this.setState({ selectedCategories: categories })}
+                maxSelections={3}
               />
             </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import './BlogPostModal.css';
+import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 class BlogPostModal extends React.Component {
   constructor(props) {
@@ -44,8 +45,8 @@ class BlogPostModal extends React.Component {
           <div className="blog-modal-meta">
             <span className="blog-modal-author">by {selectedPost.name || 'Anonymous'}</span>
             {selectedPost.created_at && (
-              <span className="blog-modal-date">
-                {new Date(selectedPost.created_at).toLocaleDateString()}
+              <span className="blog-modal-date" title={formatDate(selectedPost.created_at)}>
+                {formatRelativeTime(selectedPost.created_at)}
               </span>
             )}
           </div>
@@ -66,4 +67,5 @@ class BlogPostModal extends React.Component {
 }
 
 export default BlogPostModal;
+
 

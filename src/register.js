@@ -67,21 +67,38 @@ class Register extends React.Component {
         name: this.state.name.trim()
       })
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.error || 'Registration failed');
+          });
+        }
+        return response.json();
+      })
       .then(data => {
         this.setState({isLoading: false});
-        if (data.error) {
-          this.setState({error: data.error});
-        } else if (data && data.id) {
-          this.props.loadUser(data)
+        if (data && data.id) {
+          this.props.loadUser(data);
           this.props.onRouteChange('home');
           console.log('Registration successful:', data);
+          if (this.props.showToast) {
+            this.props.showToast(`Welcome, ${data.name}! Account created successfully.`, 'success');
+          }
         } else {
-          this.setState({error: 'Registration failed. Please try again.'});
+          const errorMsg = 'Registration failed. Please try again.';
+          this.setState({error: errorMsg});
+          if (this.props.showToast) {
+            this.props.showToast(errorMsg, 'error');
+          }
         }
       })
       .catch(err => {
-        this.setState({isLoading: false, error: 'Connection error. Please try again.'});
+        this.setState({isLoading: false});
+        const errorMsg = err.message || 'Connection error. Please try again.';
+        this.setState({error: errorMsg});
+        if (this.props.showToast) {
+          this.props.showToast(errorMsg, 'error');
+        }
         console.error('Registration error:', err);
       })
   }

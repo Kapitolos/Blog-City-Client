@@ -9,13 +9,11 @@
 
 .auth-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 6px;
   padding: 2.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e5e5e5;
   width: 100%;
   max-width: 400px;
-  backdrop-filter: blur(10px);
 }
 
 .auth-header {
@@ -24,14 +22,11 @@
 }
 
 .auth-header h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
 .auth-header p {
@@ -51,8 +46,8 @@
 }
 
 .auth-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: #2a2a2a;
+  border-color: #2a2a2a;
 }
 
 .auth-button:disabled {
@@ -76,16 +71,16 @@
 .link-button {
   background: none;
   border: none;
-  color: #667eea;
-  font-weight: 600;
+  color: #1a1a1a;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
   margin-left: 0.5rem;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .link-button:hover {
-  color: #764ba2;
+  color: #4a4a4a;
 }
 
 /* Form Enhancements */
@@ -104,19 +99,17 @@
 .form-input {
   width: 100%;
   padding: 0.875rem 1rem;
-  border: 2px solid #e1e5e9;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
   background: white;
-  color: #333;
+  color: #1a1a1a;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-  transform: translateY(-1px);
+  border-color: #1a1a1a;
 }
 
 .form-input::placeholder {
@@ -202,18 +195,3 @@
   }
 }
 
-/* Animation */
-.auth-card {
-  animation: slideUp 0.6s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}

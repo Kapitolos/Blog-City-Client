@@ -7,7 +7,21 @@ const StickyNavbar = ({ isSignedIn, user, onRouteChange, loadUser, signout, onSe
     <nav className="sticky-navbar">
       <div className="navbar-content">
         <div className="navbar-brand">
-          <h2>🏙️ Blog City</h2>
+          <h2 
+            className="navbar-title"
+            onClick={() => onRouteChange('blogs')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onRouteChange('blogs');
+              }
+            }}
+            aria-label="Go to home page"
+          >
+            🏙️ Blog City
+          </h2>
         </div>
         
         <div className="navbar-search">

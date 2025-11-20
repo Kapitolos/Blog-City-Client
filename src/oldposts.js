@@ -1,5 +1,9 @@
 import React from 'react';
 import './oldposts.css';
+import LoadingSkeleton from './components/LoadingSkeleton.js';
+import EditPostModal from './components/EditPostModal.js';
+import ConfirmDialog from './components/ConfirmDialog.js';
+import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 class OldPosts extends React.Component {
   constructor(props) {
@@ -7,7 +11,9 @@ class OldPosts extends React.Component {
     this.state = {
       oldposts: [],
       isLoading: false,
-      error: ''
+      error: '',
+      editingPost: null,
+      deletingPost: null
     }
   }
 
@@ -63,15 +69,79 @@ class OldPosts extends React.Component {
     }
   }
 
+  handleEdit = (post) => {
+    this.setState({ editingPost: post });
+  }
+
+  handleDelete = (post) => {
+    this.setState({ deletingPost: post });
+  }
+
+  closeEditModal = () => {
+    this.setState({ editingPost: null });
+  }
+
+  closeDeleteDialog = () => {
+    this.setState({ deletingPost: null });
+  }
+
+  handleSaveEdit = (updatedPost) => {
+    this.closeEditModal();
+    // Refresh the posts list
+    this.showoldposts();
+    // Notify parent to refresh all blogs if needed
+    if (this.props.onPostUpdated) {
+      this.props.onPostUpdated(updatedPost);
+    }
+  }
+
+  confirmDelete = () => {
+    const { deletingPost } = this.state;
+    if (!deletingPost) return;
+
+    this.setState({ isLoading: true });
+
+    fetch(`http://localhost:3001/blogpost/${deletingPost.id}?user_id=${this.props.id}`, {
+      method: 'delete',
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.error || 'Failed to delete post');
+          });
+        }
+        return response.json();
+      })
+      .then(result => {
+        this.setState({ isLoading: false, deletingPost: null });
+        // Refresh the posts list
+        this.showoldposts();
+        // Notify parent to refresh all blogs if needed
+        if (this.props.onPostDeleted) {
+          this.props.onPostDeleted(deletingPost.id);
+        }
+        if (this.props.showToast) {
+          this.props.showToast('Post deleted successfully', 'success');
+        }
+      })
+      .catch(err => {
+        console.error('Error deleting post:', err);
+        this.setState({ isLoading: false });
+        if (this.props.showToast) {
+          this.props.showToast(err.message || 'Failed to delete post', 'error');
+        }
+      });
+  }
+
   render() {
     const { oldposts, isLoading, error } = this.state;
 
     return (
       <div className="user-posts-container">
         {isLoading && (
-          <div className="loading-indicator">
-            <div className="mini-spinner"></div>
-            <span>Loading posts...</span>
+          <div className="user-posts-list">
+            <LoadingSkeleton count={3} type="post-item" />
           </div>
         )}
 
@@ -82,8 +152,12 @@ class OldPosts extends React.Component {
         )}
 
         {!isLoading && !error && oldposts.length === 0 && (
-          <div className="no-posts-message">
-            <p>No previous posts yet. Start writing your first blog post!</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">📝</div>
+            <h4 className="empty-state-title">No Posts Yet</h4>
+            <p className="empty-state-message">
+              Start writing your first blog post to see it here!
+            </p>
           </div>
         )}
 
@@ -96,8 +170,8 @@ class OldPosts extends React.Component {
                     {post.posttitle || 'Untitled Post'}
                   </h4>
                   {post.created_at && (
-                    <span className="user-post-date">
-                      {new Date(post.created_at).toLocaleDateString()}
+                    <span className="user-post-date" title={formatDate(post.created_at)}>
+                      {formatRelativeTime(post.created_at)}
                     </span>
                   )}
                 </div>
@@ -110,10 +184,49 @@ class OldPosts extends React.Component {
                     'No content available'
                   }</p>
                 </div>
+                <div className="user-post-actions">
+                  <button
+                    className="edit-post-btn"
+                    onClick={() => this.handleEdit(post)}
+                    title="Edit post"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    className="delete-post-btn"
+                    onClick={() => this.handleDelete(post)}
+                    title="Delete post"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* Edit Post Modal */}
+        {this.state.editingPost && (
+          <EditPostModal
+            post={this.state.editingPost}
+            userId={this.props.id}
+            onClose={this.closeEditModal}
+            onSave={this.handleSaveEdit}
+            showToast={this.props.showToast}
+          />
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={!!this.state.deletingPost}
+          title="Delete Post"
+          message={`Are you sure you want to delete "${this.state.deletingPost?.posttitle || 'this post'}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={this.confirmDelete}
+          onCancel={this.closeDeleteDialog}
+          type="danger"
+        />
 
         {!isLoading && oldposts.length > 0 && (
           <div className="refresh-posts">

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './UserProfile.css';
+import LoadingSkeleton from './components/LoadingSkeleton.js';
+import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 const UserProfile = ({ userId, userName, onClose }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -67,9 +69,8 @@ const UserProfile = ({ userId, userName, onClose }) => {
         <h4>Posts by {userName}</h4>
         
         {isLoading && (
-          <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p>Loading posts...</p>
+          <div className="user-posts-grid">
+            <LoadingSkeleton count={4} type="blog-card" />
           </div>
         )}
         
@@ -80,8 +81,12 @@ const UserProfile = ({ userId, userName, onClose }) => {
         )}
         
         {!isLoading && !error && userPosts.length === 0 && (
-          <div className="no-posts-message">
-            <p>No posts found for this user.</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">📝</div>
+            <h4 className="empty-state-title">No Posts Yet</h4>
+            <p className="empty-state-message">
+              {userName} hasn't published any posts yet.
+            </p>
           </div>
         )}
         
@@ -95,8 +100,8 @@ const UserProfile = ({ userId, userName, onClose }) => {
               >
                 <div className="post-header">
                   <h5 className="post-title">{post.posttitle || 'Untitled'}</h5>
-                  <span className="post-date">
-                    {post.created_at ? new Date(post.created_at).toLocaleDateString() : 'Recently'}
+                  <span className="post-date" title={post.created_at ? formatDate(post.created_at) : ''}>
+                    {post.created_at ? formatRelativeTime(post.created_at) : 'Recently'}
                   </span>
                 </div>
                 <div className="post-preview">
@@ -125,8 +130,8 @@ const UserProfile = ({ userId, userName, onClose }) => {
             <div className="post-modal-meta">
               <span className="post-modal-author">by {selectedPost.name || 'Anonymous'}</span>
               {selectedPost.created_at && (
-                <span className="post-modal-date">
-                  {new Date(selectedPost.created_at).toLocaleDateString()}
+                <span className="post-modal-date" title={formatDate(selectedPost.created_at)}>
+                  {formatRelativeTime(selectedPost.created_at)}
                 </span>
               )}
             </div>
