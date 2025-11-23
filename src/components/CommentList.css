@@ -40,6 +40,13 @@
 
 .comment-author-info {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.comment-author-details {
+  display: flex;
   flex-direction: column;
   gap: 0.25rem;
   flex: 1;

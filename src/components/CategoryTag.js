@@ -26,3 +26,5 @@ const CategoryTag = ({ category, onClick, clickable = false }) => {
 export default CategoryTag;
 
 
+
+

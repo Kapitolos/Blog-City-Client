@@ -104,12 +104,14 @@ const UserProfile = ({ userId, userName, onClose }) => {
                     {post.created_at ? formatRelativeTime(post.created_at) : 'Recently'}
                   </span>
                 </div>
-                <div className="post-preview">
-                  <p>{post.postbody ? 
-                    (post.postbody.length > 120 ? `${post.postbody.substring(0, 120)}...` : post.postbody) 
-                    : 'No content available'}
-                  </p>
-                </div>
+                <div 
+                  className="post-preview"
+                  dangerouslySetInnerHTML={{ 
+                    __html: post.postbody ? 
+                      (post.postbody.length > 120 ? `${post.postbody.substring(0, 120)}...` : post.postbody) 
+                      : '<p>No content available</p>'
+                  }}
+                />
               </div>
             ))}
           </div>
@@ -136,9 +138,10 @@ const UserProfile = ({ userId, userName, onClose }) => {
               )}
             </div>
             
-            <div className="post-modal-body">
-              <p>{selectedPost.postbody}</p>
-            </div>
+            <div 
+              className="post-modal-body"
+              dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+            />
             
             <div className="post-modal-footer">
               <button className="post-modal-close-btn" onClick={closeModal}>

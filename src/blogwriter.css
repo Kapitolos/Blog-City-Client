@@ -294,3 +294,62 @@
   outline: 2px solid #1a1a1a;
   outline-offset: 2px;
 }
+
+/* Blog Action Buttons Container */
+.blog-action-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Draft Button Styles */
+.draft-button {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+}
+
+.draft-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.draft-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.draft-button.saving {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.draft-icon {
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .blog-action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .draft-button,
+  .publish-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

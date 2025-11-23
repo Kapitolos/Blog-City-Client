@@ -166,24 +166,33 @@ class OldPosts extends React.Component {
             {oldposts.map((post, index) => (
               <div key={post.id || index} className="user-post-item">
                 <div className="user-post-header">
-                  <h4 className="user-post-title">
-                    {post.posttitle || 'Untitled Post'}
-                  </h4>
+                  <div className="user-post-title-row">
+                    <h4 className="user-post-title">
+                      {post.posttitle || 'Untitled Post'}
+                    </h4>
+                    {post.status === 'draft' && (
+                      <span className="draft-badge" title="This post is a draft">
+                        📝 Draft
+                      </span>
+                    )}
+                  </div>
                   {post.created_at && (
                     <span className="user-post-date" title={formatDate(post.created_at)}>
                       {formatRelativeTime(post.created_at)}
                     </span>
                   )}
                 </div>
-                <div className="user-post-preview">
-                  <p>{post.postbody ? 
-                    (post.postbody.length > 100 ? 
-                      post.postbody.substring(0, 100) + '...' : 
-                      post.postbody
-                    ) : 
-                    'No content available'
-                  }</p>
-                </div>
+                <div 
+                  className="user-post-preview"
+                  dangerouslySetInnerHTML={{ 
+                    __html: post.postbody ? 
+                      (post.postbody.length > 100 ? 
+                        post.postbody.substring(0, 100) + '...' : 
+                        post.postbody
+                      ) : 
+                      '<p>No content available</p>'
+                  }}
+                />
                 <div className="user-post-actions">
                   <button
                     className="edit-post-btn"

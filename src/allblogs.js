@@ -7,6 +7,7 @@ import Pagination from './components/Pagination.js';
 import LikeButton from './components/LikeButton.js';
 import CommentsSection from './components/CommentsSection.js';
 import CategoryTag from './components/CategoryTag.js';
+import Avatar from './components/Avatar.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 class AllBlogs extends React.Component {
@@ -36,16 +37,47 @@ class AllBlogs extends React.Component {
     allblogview = (page = this.state.currentPage) => {
         this.setState({isLoading: true, error: ''});
         
+        // Ensure selectedCategory is a primitive value (number or null)
+        // Safely extract the value, handling any edge cases
+        let categoryId = null;
+        const selectedCategory = this.state.selectedCategory;
+        
+        if (selectedCategory === null || selectedCategory === undefined) {
+          categoryId = null;
+        } else if (typeof selectedCategory === 'number') {
+          categoryId = selectedCategory;
+        } else if (typeof selectedCategory === 'string') {
+          // Try to parse string to number
+          const parsed = parseInt(selectedCategory, 10);
+          categoryId = isNaN(parsed) ? null : parsed;
+        } else {
+          // If it's anything else (object, DOM element, etc.), set to null
+          console.warn('Invalid selectedCategory type, resetting to null:', typeof selectedCategory);
+          categoryId = null;
+          // Also reset the state to prevent future issues
+          this.setState({ selectedCategory: null });
+        }
+        
+        // Build request body with only primitive values
+        const requestBody = {
+          page: typeof page === 'number' ? page : 1,
+          limit: typeof this.state.postsPerPage === 'number' ? this.state.postsPerPage : 10,
+          category_id: categoryId
+        };
+        
         fetch('http://localhost:3001/allblogs', {
           method: 'post',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            page: page,
-            limit: this.state.postsPerPage,
-            category_id: this.state.selectedCategory
-          })
+          body: JSON.stringify(requestBody)
         })
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(errData => {
+                throw new Error(errData.error || `HTTP ${response.status}: ${response.statusText}`);
+              });
+            }
+            return response.json();
+          })
           .then(data => {
             if (data && data.blogs && Array.isArray(data.blogs)) {
               this.setState({
@@ -169,14 +201,31 @@ class AllBlogs extends React.Component {
     }
 
     handleCategoryFilter = (categoryId) => {
-      if (this.state.selectedCategory === categoryId) {
+      // Ensure categoryId is a primitive number, not an event or DOM element
+      let id = null;
+      
+      if (categoryId === null || categoryId === undefined) {
+        id = null;
+      } else if (typeof categoryId === 'number') {
+        id = categoryId;
+      } else if (typeof categoryId === 'string') {
+        // Try to parse string to number
+        const parsed = parseInt(categoryId, 10);
+        id = isNaN(parsed) ? null : parsed;
+      } else {
+        // If it's anything else (object, DOM element, event, etc.), ignore it
+        console.warn('Invalid categoryId type in handleCategoryFilter:', typeof categoryId);
+        return;
+      }
+      
+      if (this.state.selectedCategory === id) {
         // Clear filter
         this.setState({ selectedCategory: null, currentPage: 1 }, () => {
           this.allblogview(1);
         });
       } else {
-        // Apply filter
-        this.setState({ selectedCategory: categoryId, currentPage: 1 }, () => {
+        // Apply filter - ensure we're storing a primitive number
+        this.setState({ selectedCategory: id, currentPage: 1 }, () => {
           this.allblogview(1);
         });
       }
@@ -293,7 +342,7 @@ class AllBlogs extends React.Component {
                             >
                                 <div className="blog-card-header">
                                     <h3 className="blog-title">{blog.posttitle || 'Untitled'}</h3>
-                                    <span 
+                                    <div 
                                         className="blog-author clickable-author"
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -304,8 +353,13 @@ class AllBlogs extends React.Component {
                                             }
                                         }}
                                     >
-                                        by {blog.name || 'Anonymous'}
-                                    </span>
+                                        <Avatar 
+                                          userId={blog.user_id}
+                                          userName={blog.name}
+                                          size="small"
+                                        />
+                                        <span>by {blog.name || 'Anonymous'}</span>
+                                    </div>
                                 </div>
                                 {blog.categories && blog.categories.length > 0 && (
                                     <div className="blog-categories">
@@ -319,9 +373,10 @@ class AllBlogs extends React.Component {
                                         ))}
                                     </div>
                                 )}
-                                <div className="blog-content">
-                                    <p>{blog.postbody || 'No content available'}</p>
-                                </div>
+                                <div 
+                                  className="blog-content"
+                                  dangerouslySetInnerHTML={{ __html: blog.postbody || '<p>No content available</p>' }}
+                                />
                                 <div className="blog-card-footer">
                                     <div className="blog-footer-left">
                                         <span 
@@ -384,7 +439,14 @@ class AllBlogs extends React.Component {
                             
                             <div className="blog-modal-meta">
                                 <div className="blog-modal-meta-left">
-                                    <span className="blog-modal-author">by {selectedPost.name || 'Anonymous'}</span>
+                                    <div className="blog-modal-author">
+                                        <Avatar 
+                                          userId={selectedPost.user_id}
+                                          userName={selectedPost.name}
+                                          size="small"
+                                        />
+                                        <span>by {selectedPost.name || 'Anonymous'}</span>
+                                    </div>
                                     {selectedPost.created_at && (
                                         <span className="blog-modal-date" title={formatDate(selectedPost.created_at)}>
                                             {formatRelativeTime(selectedPost.created_at)}
@@ -410,9 +472,10 @@ class AllBlogs extends React.Component {
                                 </div>
                             )}
                             
-                            <div className="blog-modal-body">
-                                <p>{selectedPost.postbody}</p>
-                            </div>
+                            <div 
+                              className="blog-modal-body"
+                              dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+                            />
                             
                             <CommentsSection
                                 postId={selectedPost.id}

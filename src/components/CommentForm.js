@@ -73,11 +73,19 @@ const CommentForm = ({ postId, userId, userName, onSubmit, onCancel }) => {
       <div className="comment-form-group">
         <textarea
           className="comment-textarea"
-          placeholder="Write your comment here..."
+          placeholder="Write your comment here... (Press Ctrl+Enter to submit)"
           value={commentText}
           onChange={(e) => {
             setCommentText(e.target.value);
             setError('');
+          }}
+          onKeyDown={(e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+              e.preventDefault();
+              if (!isSubmitting && commentText.trim()) {
+                handleSubmit(e);
+              }
+            }
           }}
           maxLength={1000}
           rows={3}

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './CommentList.css';
+import ConfirmDialog from './ConfirmDialog.js';
+import Avatar from './Avatar.js';
 import { formatRelativeTime, formatDate } from '../utils/dateUtils.js';
 
 const CommentList = ({ comments, currentUserId, onDelete }) => {
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
+
   if (!comments || comments.length === 0) {
     return (
       <div className="comment-list-empty">
@@ -11,14 +15,15 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
     );
   }
 
-  const handleDelete = (commentId, e) => {
+  const handleDeleteClick = (commentId, e) => {
     e.stopPropagation();
-    
-    if (!window.confirm('Are you sure you want to delete this comment?')) {
-      return;
-    }
+    setDeletingCommentId(commentId);
+  };
 
-    fetch(`http://localhost:3001/comment/${commentId}?user_id=${currentUserId}`, {
+  const confirmDelete = () => {
+    if (!deletingCommentId) return;
+
+    fetch(`http://localhost:3001/comment/${deletingCommentId}?user_id=${currentUserId}`, {
       method: 'delete',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -32,14 +37,22 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
       })
       .then(() => {
         if (onDelete) {
-          onDelete(commentId);
+          onDelete(deletingCommentId);
         }
+        setDeletingCommentId(null);
       })
       .catch(err => {
         console.error('Error deleting comment:', err);
         alert(err.message || 'Failed to delete comment');
+        setDeletingCommentId(null);
       });
   };
+
+  const cancelDelete = () => {
+    setDeletingCommentId(null);
+  };
+
+  const deletingComment = comments.find(c => c.id === deletingCommentId);
 
   return (
     <div className="comment-list">
@@ -47,18 +60,25 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
         <div key={comment.id} className="comment-item">
           <div className="comment-header">
             <div className="comment-author-info">
-              <span className="comment-author-name">{comment.user_name}</span>
-              <span 
-                className="comment-date"
-                title={formatDate(comment.created_at)}
-              >
-                {formatRelativeTime(comment.created_at)}
-              </span>
+              <Avatar 
+                userId={comment.user_id}
+                userName={comment.user_name}
+                size="small"
+              />
+              <div className="comment-author-details">
+                <span className="comment-author-name">{comment.user_name}</span>
+                <span 
+                  className="comment-date"
+                  title={formatDate(comment.created_at)}
+                >
+                  {formatRelativeTime(comment.created_at)}
+                </span>
+              </div>
             </div>
             {currentUserId && currentUserId === comment.user_id && (
               <button
                 className="comment-delete-btn"
-                onClick={(e) => handleDelete(comment.id, e)}
+                onClick={(e) => handleDeleteClick(comment.id, e)}
                 title="Delete comment"
                 aria-label="Delete comment"
               >
@@ -71,6 +91,17 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
           </div>
         </div>
       ))}
+      
+      <ConfirmDialog
+        isOpen={!!deletingCommentId}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        type="danger"
+      />
     </div>
   );
 };

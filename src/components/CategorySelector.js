@@ -7,13 +7,21 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
 
   useEffect(() => {
     fetch('http://localhost:3001/categories')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        return response.json();
+      })
       .then(data => {
-        setCategories(data || []);
+        // Ensure data is an array
+        const categoriesArray = Array.isArray(data) ? data : [];
+        setCategories(categoriesArray);
         setIsLoading(false);
       })
       .catch(err => {
         console.error('Error fetching categories:', err);
+        setCategories([]); // Set empty array on error
         setIsLoading(false);
       });
   }, []);
@@ -43,7 +51,7 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
         )}
       </label>
       <div className="category-options">
-        {categories.map(category => {
+        {Array.isArray(categories) && categories.length > 0 ? categories.map(category => {
           const isSelected = selectedCategories.includes(category.id);
           const isDisabled = !isSelected && selectedCategories.length >= maxSelections;
           
@@ -62,7 +70,9 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
               {category.name}
             </button>
           );
-        })}
+        }) : (
+          <p className="category-empty">No categories available</p>
+        )}
       </div>
       {selectedCategories.length === 0 && (
         <p className="category-hint">Select categories to help readers find your post</p>

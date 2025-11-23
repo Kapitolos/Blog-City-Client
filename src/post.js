@@ -31,9 +31,10 @@ class Post extends React.Component {
           </div>
         </div>
         
-        <div className="blog-post-content">
-          <p>{postbody}</p>
-        </div>
+        <div 
+          className="blog-post-content"
+          dangerouslySetInnerHTML={{ __html: postbody }}
+        />
       </div>
     );
   }

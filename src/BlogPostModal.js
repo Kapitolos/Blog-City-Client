@@ -51,9 +51,10 @@ class BlogPostModal extends React.Component {
             )}
           </div>
           
-          <div className="blog-modal-body">
-            <p>{selectedPost.postbody}</p>
-          </div>
+          <div 
+            className="blog-modal-body"
+            dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+          />
           
           <div className="blog-modal-footer">
             <button className="blog-modal-close-btn" onClick={this.closeModal}>

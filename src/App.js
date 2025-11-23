@@ -10,6 +10,8 @@ import RegButton from './RegButton.js';
 import SearchBar from './searchbar';
 import StickyNavbar from './StickyNavbar.js';
 import ToastContainer from './components/ToastContainer.js';
+import BackToTop from './components/BackToTop.js';
+import Avatar from './components/Avatar.js';
 import './App.css';
 import React from 'react';
 
@@ -160,6 +162,8 @@ class App extends React.Component {
           removeToast={this.removeToast}
         />
         
+        <BackToTop />
+        
         <StickyNavbar 
           isSignedIn={this.state.isSignedIn}
           user={this.state.user}
@@ -215,6 +219,17 @@ class App extends React.Component {
                 <div className="user-profile-section">
                   <h3>Your Profile</h3>
                   <div className="user-profile">
+                    <div className="user-profile-avatar">
+                      <Avatar 
+                        userId={this.state.user.id}
+                        userName={this.state.user.name}
+                        size="large"
+                        showUpload={true}
+                        onUpload={(url) => {
+                          this.showToast('Avatar updated successfully!', 'success');
+                        }}
+                      />
+                    </div>
                     <p><strong>Name:</strong> {this.state.user.name}</p>
                     <p><strong>Email:</strong> {this.state.user.email}</p>
                     <p><strong>User ID:</strong> {this.state.user.id}</p>

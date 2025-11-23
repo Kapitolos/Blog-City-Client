@@ -1,6 +1,7 @@
 import React from 'react';
 import './blogwriter.css';
 import CategorySelector from './components/CategorySelector.js';
+import RichTextEditor from './components/RichTextEditor.js';
 
 class BlogWriter extends React.Component {
   constructor(props) {
@@ -9,6 +10,7 @@ class BlogWriter extends React.Component {
       postbody: '',
       posttitle: '',
       isPublishing: false,
+      isSavingDraft: false,
       error: '',
       success: false,
       selectedCategories: []
@@ -43,8 +45,15 @@ class BlogWriter extends React.Component {
     return true;
   }
 
-  onSubmitBlog = () => {
-    if (!this.validateForm()) {
+  onSubmitBlog = (status = 'published') => {
+    // For drafts, only require title (content can be empty)
+    if (status === 'published' && !this.validateForm()) {
+      return;
+    }
+    
+    // For drafts, at least require a title
+    if (status === 'draft' && !this.state.posttitle.trim()) {
+      this.setState({error: 'Please enter a title for your draft'});
       return;
     }
 
@@ -52,17 +61,23 @@ class BlogWriter extends React.Component {
     console.log('Props:', { name: this.props.name, id: this.props.id });
     console.log('State:', { 
       posttitle: this.state.posttitle, 
-      postbody: this.state.postbody?.substring(0, 50) + '...' 
+      postbody: this.state.postbody?.substring(0, 50) + '...',
+      status: status
     });
 
-    this.setState({isPublishing: true, error: ''});
+    if (status === 'published') {
+      this.setState({isPublishing: true, error: ''});
+    } else {
+      this.setState({isSavingDraft: true, error: ''});
+    }
 
     const requestBody = {
       name: this.props.name,
-      postbody: this.state.postbody.trim(),
-      posttitle: this.state.posttitle.trim(),
+      postbody: (this.state.postbody || '').trim() || '',
+      posttitle: (this.state.posttitle || '').trim(),
       id: this.props.id,
-      category_ids: this.state.selectedCategories
+      category_ids: this.state.selectedCategories || [],
+      status: status
     };
 
     console.log('Request body being sent:', requestBody);
@@ -77,7 +92,12 @@ class BlogWriter extends React.Component {
         console.log('Response headers:', response.headers);
         
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          // Try to get error details from response
+          return response.json().then(data => {
+            throw new Error(data.error || data.details || `HTTP ${response.status}: ${response.statusText}`);
+          }).catch(() => {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          });
         }
         
         return response.json();
@@ -95,23 +115,35 @@ class BlogWriter extends React.Component {
             });
           } else {
             // Success
+            const isDraft = status === 'draft';
             this.setState({
               postbody: '',
               posttitle: '',
               isPublishing: false,
+              isSavingDraft: false,
               selectedCategories: []
             });
             
             // Clear the form fields
             document.getElementById('posttitle').value = '';
-            document.getElementById('postbody').value = '';
+            // Note: Rich text editor doesn't use getElementById, but clearing state handles it
             
-            this.props.loadBlog(data);
-            console.log('✅ Blog published successfully:', data);
+            if (!isDraft) {
+              this.props.loadBlog(data);
+            }
+            console.log(`✅ Blog ${isDraft ? 'saved as draft' : 'published'} successfully:`, data);
             
             // Show toast notification if available
             if (this.props.showToast) {
-              this.props.showToast('Blog post published successfully!', 'success');
+              this.props.showToast(
+                isDraft ? 'Draft saved successfully!' : 'Blog post published successfully!', 
+                'success'
+              );
+            }
+            
+            // Refresh user posts to show the new draft
+            if (isDraft && this.props.onDraftSaved) {
+              this.props.onDraftSaved();
             }
           }
         } else {
@@ -126,14 +158,24 @@ class BlogWriter extends React.Component {
         console.error('❌ Blog publishing error:', err);
         this.setState({
           error: `Connection error: ${err.message}. Please check your internet and try again.`,
-          isPublishing: false
+          isPublishing: false,
+          isSavingDraft: false
         });
       });
   }
 
+  onSaveDraft = () => {
+    this.onSubmitBlog('draft');
+  }
+
   render() {
-    const { posttitle, postbody, isPublishing, error } = this.state;
-    const charCount = postbody.length;
+    const { posttitle, postbody, isPublishing, isSavingDraft, error } = this.state;
+    // Get plain text length for character count (strip HTML)
+    const tempDiv = document.createElement('div');
+    if (postbody) {
+      tempDiv.innerHTML = postbody;
+    }
+    const charCount = tempDiv.textContent?.length || tempDiv.innerText?.length || 0;
     const titleCharCount = posttitle.length;
 
     return (
@@ -150,7 +192,7 @@ class BlogWriter extends React.Component {
             </div>
           )}
 
-          <div className="blog-form">
+          <form className="blog-form" onSubmit={(e) => { e.preventDefault(); this.onSubmitBlog(); }}>
             <div className="form-group">
               <label className="form-label" htmlFor="posttitle">
                 Blog Title
@@ -172,19 +214,21 @@ class BlogWriter extends React.Component {
             <div className="form-group">
               <label className="form-label" htmlFor="postbody">
                 Blog Content
-                <span className="char-count">{charCount}/5000</span>
               </label>
-              <textarea
-                className="blog-content-textarea"
-                name="postbody"
-                id="postbody"
-                placeholder="Write your blog post content here..."
+              <RichTextEditor
                 value={postbody}
-                onChange={this.onTextChange}
+                onChange={(content) => {
+                  // Always update state to allow typing
+                  // Character count validation happens on submit
+                  this.setState({ postbody: content, error: '', success: false });
+                }}
+                placeholder="Write your blog post content here... Use the toolbar to format your text."
                 maxLength={5000}
                 rows={12}
-                required
               />
+              <div className="char-count-info">
+                <span className="char-count">{charCount}/5000 characters</span>
+              </div>
             </div>
 
             <div className="form-group">
@@ -196,24 +240,45 @@ class BlogWriter extends React.Component {
             </div>
 
             <div className="blog-actions">
-              <button
-                onClick={this.onSubmitBlog}
-                className={`publish-button ${isPublishing ? 'publishing' : ''}`}
-                disabled={isPublishing || !posttitle.trim() || !postbody.trim()}
-                type="button"
-              >
-                {isPublishing ? (
-                  <>
-                    <span className="spinner"></span>
-                    Publishing...
-                  </>
-                ) : (
-                  <>
-                    <span className="publish-icon">📝</span>
-                    Publish Blog Post
-                  </>
-                )}
-              </button>
+              <div className="blog-action-buttons">
+                <button
+                  onClick={this.onSaveDraft}
+                  className={`draft-button ${isSavingDraft ? 'saving' : ''}`}
+                  disabled={isSavingDraft || isPublishing || !posttitle.trim()}
+                  type="button"
+                >
+                  {isSavingDraft ? (
+                    <>
+                      <span className="spinner"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <span className="draft-icon">💾</span>
+                      Save as Draft
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => this.onSubmitBlog('published')}
+                  className={`publish-button ${isPublishing ? 'publishing' : ''}`}
+                  disabled={isPublishing || isSavingDraft || !posttitle.trim() || !postbody.trim()}
+                  type="submit"
+                >
+                  {isPublishing ? (
+                    <>
+                      <span className="spinner"></span>
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <span className="publish-icon">📝</span>
+                      Publish Blog Post
+                    </>
+                  )}
+                </button>
+              </div>
 
               <div className="blog-requirements">
                 <p>• Title: 3-100 characters</p>
@@ -221,7 +286,7 @@ class BlogWriter extends React.Component {
                 <p>• Current: {titleCharCount} + {charCount} = {titleCharCount + charCount} total</p>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     );
