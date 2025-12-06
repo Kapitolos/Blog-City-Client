@@ -160,6 +160,20 @@
   border-color: #1a1a1a;
 }
 
+.write-post-btn {
+  background: #1a1a1a;
+  color: white;
+  border-color: #1a1a1a;
+  font-weight: 500;
+}
+
+.write-post-btn:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar-content {
@@ -193,6 +207,7 @@
     flex-direction: column;
     gap: 8px;
     text-align: center;
+    width: 100%;
   }
   
   .user-info {
@@ -202,6 +217,11 @@
   .auth-buttons {
     width: 100%;
     justify-content: center;
+  }
+  
+  .write-post-btn {
+    width: 100%;
+    max-width: none;
   }
   
   .btn {

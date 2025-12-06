@@ -35,6 +35,12 @@ const StickyNavbar = ({ isSignedIn, user, onRouteChange, loadUser, signout, onSe
                 <span className="user-name">{user.name}</span>
                 <span className="user-id">ID: {user.id}</span>
               </div>
+              <button 
+                onClick={() => onRouteChange('home')} 
+                className="btn btn-primary write-post-btn"
+              >
+                ✍️ Write Post
+              </button>
               <button onClick={signout} className="btn btn-outline">
                 Sign Out
               </button>

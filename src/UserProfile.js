@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './UserProfile.css';
 import LoadingSkeleton from './components/LoadingSkeleton.js';
+import Avatar from './components/Avatar.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 const UserProfile = ({ userId, userName, onClose }) => {
@@ -49,21 +50,24 @@ const UserProfile = ({ userId, userName, onClose }) => {
   };
 
   return (
-    <div className="user-profile-container">
-      <div className="user-profile-header">
-        <div className="user-info">
-          <div className="user-avatar">
-            <span className="avatar-text">{userName.charAt(0).toUpperCase()}</span>
+    <div className="user-profile-modal-overlay" onClick={onClose}>
+      <div className="user-profile-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="user-profile-header">
+          <div className="user-info">
+            <Avatar 
+              userId={userId}
+              userName={userName}
+              size="large"
+            />
+            <div className="user-details">
+              <h3>{userName}</h3>
+              <p>Blog Author</p>
+            </div>
           </div>
-          <div className="user-details">
-            <h3>{userName}</h3>
-            <p>Blog Author</p>
-          </div>
+          <button className="close-button" onClick={onClose}>
+            ✕
+          </button>
         </div>
-        <button className="close-button" onClick={onClose}>
-          ✕
-        </button>
-      </div>
       
       <div className="user-posts-section">
         <h4>Posts by {userName}</h4>
@@ -151,6 +155,7 @@ const UserProfile = ({ userId, userName, onClose }) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

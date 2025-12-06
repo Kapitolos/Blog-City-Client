@@ -263,6 +263,7 @@ class App extends React.Component {
                   allblogs={this.state.allblogs}
                   userId={this.state.user.id}
                   userName={this.state.user.name}
+                  showToast={this.showToast}
                 />
               </div>
             </div>

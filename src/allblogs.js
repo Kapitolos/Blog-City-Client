@@ -8,6 +8,7 @@ import LikeButton from './components/LikeButton.js';
 import CommentsSection from './components/CommentsSection.js';
 import CategoryTag from './components/CategoryTag.js';
 import Avatar from './components/Avatar.js';
+import EditPostModal from './components/EditPostModal.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
 class AllBlogs extends React.Component {
@@ -30,7 +31,9 @@ class AllBlogs extends React.Component {
         postsPerPage: 10,
         commentCounts: {}, // Store comment counts for each post
         selectedCategory: null,
-        categories: [] // Store all available categories
+        categories: [], // Store all available categories
+        showEditModal: false,
+        postToEdit: null
       }
     }
 
@@ -151,6 +154,32 @@ class AllBlogs extends React.Component {
       });
     };
 
+    handleEditPost = (post) => {
+      this.setState({
+        showEditModal: true,
+        postToEdit: post,
+        isModalOpen: false // Close the view modal
+      });
+    };
+
+    closeEditModal = () => {
+      this.setState({
+        showEditModal: false,
+        postToEdit: null
+      });
+    };
+
+    handlePostUpdated = (updatedPost) => {
+      // Refresh the blog list
+      this.allblogview(this.state.currentPage);
+      // Close edit modal
+      this.closeEditModal();
+      // If this was the currently selected post, update it
+      if (this.state.selectedPost && this.state.selectedPost.id === updatedPost.id) {
+        this.setState({ selectedPost: updatedPost });
+      }
+    };
+
     handleUserClick = (userName, userId) => {
       console.log('User clicked:', { userName, userId });
       this.setState({
@@ -185,15 +214,92 @@ class AllBlogs extends React.Component {
     };
 
     componentDidMount() {
-        this.allblogview();
+        // Fetch categories first, then load preference and blogs
         this.fetchCategories();
+        // Load blogs - preference will be applied after categories load
+        this.allblogview();
+    }
+
+    componentDidUpdate(prevProps) {
+        // If userId changed, reload categories and preference
+        if (prevProps.userId !== this.props.userId) {
+            // If user signed out (userId is now null/undefined), clear the selected category
+            if (!this.props.userId) {
+                this.setState({ selectedCategory: null }, () => {
+                    // Clear the filter and reload
+                    this.allblogview(1);
+                });
+            } else {
+                // User signed in, load their preference
+                this.fetchCategories();
+                this.allblogview(1);
+            }
+        }
+    }
+
+    // Save category preference to database
+    saveCategoryPreference = (categoryId) => {
+        const { userId } = this.props;
+        if (userId) {
+            fetch(`http://localhost:3001/user-preference/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preferred_category_id: categoryId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error saving preference:', data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error saving category preference:', err);
+            });
+        }
+    }
+
+    // Load category preference from database
+    loadCategoryPreference = () => {
+        const { userId } = this.props;
+        if (userId) {
+            return fetch(`http://localhost:3001/user-preference/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error loading preference:', data.error);
+                        return null;
+                    }
+                    if (data.preferred_category_id !== null && data.preferred_category_id !== undefined) {
+                        const categoryId = parseInt(data.preferred_category_id, 10);
+                        if (!isNaN(categoryId)) {
+                            this.setState({ selectedCategory: categoryId });
+                            return categoryId;
+                        }
+                    }
+                    return null;
+                })
+                .catch(err => {
+                    console.error('Error loading category preference:', err);
+                    return null;
+                });
+        }
+        return Promise.resolve(null);
     }
 
     fetchCategories = () => {
+      // All categories are public, so no need to pass userId
       fetch('http://localhost:3001/categories')
         .then(response => response.json())
         .then(data => {
-          this.setState({ categories: data || [] });
+          this.setState({ categories: data || [] }, () => {
+            // After categories are loaded, load and apply saved preference
+            if (this.props.userId) {
+              this.loadCategoryPreference().then(() => {
+                // Preference loaded, refresh view
+                this.allblogview();
+              });
+            }
+          });
         })
         .catch(err => {
           console.error('Error fetching categories:', err);
@@ -220,11 +326,13 @@ class AllBlogs extends React.Component {
       
       if (this.state.selectedCategory === id) {
         // Clear filter
+        this.saveCategoryPreference(null);
         this.setState({ selectedCategory: null, currentPage: 1 }, () => {
           this.allblogview(1);
         });
       } else {
         // Apply filter - ensure we're storing a primitive number
+        this.saveCategoryPreference(id);
         this.setState({ selectedCategory: id, currentPage: 1 }, () => {
           this.allblogview(1);
         });
@@ -263,7 +371,7 @@ class AllBlogs extends React.Component {
                 </div>
 
                 {/* Category Filter */}
-                {!isSearchMode && this.state.categories.length > 0 && (
+                {!isSearchMode && (
                     <div className="category-filter-section">
                         <div className="category-filter-header">
                             <span className="category-filter-label">Filter by category:</span>
@@ -280,13 +388,15 @@ class AllBlogs extends React.Component {
                             {this.state.categories.map(category => (
                                 <button
                                     key={category.id}
-                                    className={`category-filter-btn ${this.state.selectedCategory === category.id ? 'active' : ''}`}
+                                    className={`category-filter-btn ${this.state.selectedCategory === category.id ? 'active' : ''} ${category.user_id ? 'custom-category' : ''}`}
                                     onClick={() => this.handleCategoryFilter(category.id)}
                                     style={{
                                         '--category-color': category.color || '#6a6a6a'
                                     }}
+                                    title={category.user_id ? 'Community-created category' : ''}
                                 >
                                     {category.name}
+                                    {category.user_id && <span className="custom-badge">★</span>}
                                 </button>
                             ))}
                         </div>
@@ -492,12 +602,31 @@ class AllBlogs extends React.Component {
                             />
                             
                             <div className="blog-modal-footer">
+                                {this.props.userId && selectedPost.user_id === this.props.userId && (
+                                    <button 
+                                        className="blog-modal-edit-btn" 
+                                        onClick={() => this.handleEditPost(selectedPost)}
+                                    >
+                                        ✏️ Edit Post
+                                    </button>
+                                )}
                                 <button className="blog-modal-close-btn" onClick={this.closeBlogModal}>
                                     Close
                                 </button>
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Edit Post Modal */}
+                {this.state.showEditModal && this.state.postToEdit && (
+                    <EditPostModal
+                        post={this.state.postToEdit}
+                        userId={this.props.userId}
+                        onClose={this.closeEditModal}
+                        onSave={this.handlePostUpdated}
+                        showToast={this.props.showToast}
+                    />
                 )}
 
                 {/* User Profile Component */}

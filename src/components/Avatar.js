@@ -79,42 +79,51 @@ const Avatar = ({ userId, userName, size = 'medium', showUpload = false, onUploa
   };
 
   return (
-    <div className={`avatar-container avatar-${size}`}>
-      {avatarUrl ? (
-        <img 
-          src={avatarUrl} 
-          alt={userName || 'User avatar'} 
-          className="avatar-image"
-          onError={() => setAvatarUrl(null)} // Fallback to initials if image fails to load
-        />
-      ) : (
-        <div className="avatar-initials">
-          {getInitials()}
-        </div>
-      )}
-      
+    <div className="avatar-wrapper">
+      <div className={`avatar-container avatar-${size}`}>
+        {avatarUrl ? (
+          <img 
+            src={avatarUrl} 
+            alt={userName || 'User avatar'} 
+            className="avatar-image"
+            onError={() => setAvatarUrl(null)} // Fallback to initials if image fails to load
+          />
+        ) : (
+          <div className="avatar-initials">
+            {getInitials()}
+          </div>
+        )}
+        
+        {showUpload && userId && (
+          <div className="avatar-upload-overlay">
+            <label className="avatar-upload-label" title="Upload avatar">
+              {isUploading ? (
+                <span className="avatar-upload-spinner">⏳</span>
+              ) : (
+                <span className="avatar-upload-icon">📷</span>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="avatar-upload-input"
+                disabled={isUploading}
+              />
+            </label>
+          </div>
+        )}
+        
+        {error && (
+          <div className="avatar-error">
+            {error}
+          </div>
+        )}
+      </div>
       {showUpload && userId && (
-        <div className="avatar-upload-overlay">
-          <label className="avatar-upload-label" title="Upload avatar">
-            {isUploading ? (
-              <span className="avatar-upload-spinner">⏳</span>
-            ) : (
-              <span className="avatar-upload-icon">📷</span>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="avatar-upload-input"
-              disabled={isUploading}
-            />
-          </label>
-        </div>
-      )}
-      
-      {error && (
-        <div className="avatar-error">
-          {error}
+        <div className="avatar-upload-info">
+          <p className="avatar-info-text">
+            Max size: 2MB • Recommended: Square image (e.g., 200x200px)
+          </p>
         </div>
       )}
     </div>

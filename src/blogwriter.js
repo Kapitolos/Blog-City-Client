@@ -236,6 +236,7 @@ class BlogWriter extends React.Component {
                 selectedCategories={this.state.selectedCategories}
                 onChange={(categories) => this.setState({ selectedCategories: categories })}
                 maxSelections={3}
+                userId={this.props.id}
               />
             </div>
 
