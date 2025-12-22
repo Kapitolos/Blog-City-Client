@@ -4,18 +4,41 @@ import LoadingSkeleton from './components/LoadingSkeleton.js';
 import Avatar from './components/Avatar.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 
-const UserProfile = ({ userId, userName, onClose }) => {
+const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedPost, setSelectedPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
   useEffect(() => {
     if (userId) {
       fetchUserPosts();
+      if (currentUserId && parseInt(userId) !== parseInt(currentUserId)) {
+        checkFollowStatus();
+      }
     }
-  }, [userId]);
+  }, [userId, currentUserId]);
+
+  const checkFollowStatus = () => {
+    if (!currentUserId) return;
+    
+    setIsLoadingStatus(true);
+    fetch(`http://localhost:3001/follow-status/${userId}?currentUserId=${currentUserId}`)
+      .then(response => response.json())
+      .then(data => {
+        setIsFollowing(data.isFollowing || false);
+        setIsHidden(data.isHidden || false);
+        setIsLoadingStatus(false);
+      })
+      .catch(err => {
+        console.error('Error checking follow status:', err);
+        setIsLoadingStatus(false);
+      });
+  };
 
   const fetchUserPosts = () => {
     setIsLoading(true);
@@ -49,6 +72,87 @@ const UserProfile = ({ userId, userName, onClose }) => {
     setIsModalOpen(false);
   };
 
+  const handleFollow = () => {
+    if (!currentUserId) return;
+    
+    fetch(`http://localhost:3001/follow/${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentUserId })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setIsFollowing(true);
+        }
+      })
+      .catch(err => {
+        console.error('Error following user:', err);
+      });
+  };
+
+  const handleUnfollow = () => {
+    if (!currentUserId) return;
+    
+    fetch(`http://localhost:3001/follow/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentUserId })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setIsFollowing(false);
+        }
+      })
+      .catch(err => {
+        console.error('Error unfollowing user:', err);
+      });
+  };
+
+  const handleHide = () => {
+    if (!currentUserId) return;
+    
+    fetch(`http://localhost:3001/hide-user/${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentUserId })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setIsHidden(true);
+          if (onUserHidden) {
+            onUserHidden(userId);
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Error hiding user:', err);
+      });
+  };
+
+  const handleUnhide = () => {
+    if (!currentUserId) return;
+    
+    fetch(`http://localhost:3001/hide-user/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentUserId })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setIsHidden(false);
+        }
+      })
+      .catch(err => {
+        console.error('Error unhiding user:', err);
+      });
+  };
+
+  const isOwnProfile = currentUserId && parseInt(userId) === parseInt(currentUserId);
+
   return (
     <div className="user-profile-modal-overlay" onClick={onClose}>
       <div className="user-profile-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -64,9 +168,49 @@ const UserProfile = ({ userId, userName, onClose }) => {
               <p>Blog Author</p>
             </div>
           </div>
-          <button className="close-button" onClick={onClose}>
-            ✕
-          </button>
+          <div className="user-profile-actions">
+            {!isOwnProfile && currentUserId && (
+              <>
+                {isFollowing ? (
+                  <button 
+                    className="btn-unfollow"
+                    onClick={handleUnfollow}
+                    disabled={isLoadingStatus}
+                  >
+                    ✓ Following
+                  </button>
+                ) : (
+                  <button 
+                    className="btn-follow"
+                    onClick={handleFollow}
+                    disabled={isLoadingStatus}
+                  >
+                    + Follow
+                  </button>
+                )}
+                {isHidden ? (
+                  <button 
+                    className="btn-unhide"
+                    onClick={handleUnhide}
+                    disabled={isLoadingStatus}
+                  >
+                    👁️ Unhide
+                  </button>
+                ) : (
+                  <button 
+                    className="btn-hide"
+                    onClick={handleHide}
+                    disabled={isLoadingStatus}
+                  >
+                    🚫 Hide
+                  </button>
+                )}
+              </>
+            )}
+            <button className="close-button" onClick={onClose}>
+              ✕
+            </button>
+          </div>
         </div>
       
       <div className="user-posts-section">

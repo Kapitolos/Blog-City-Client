@@ -62,6 +62,35 @@
   margin-bottom: 0;
 }
 
+/* Embedded content styles */
+.blog-post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blog-post-content iframe {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  min-height: 315px;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive iframe for YouTube */
+@media (min-width: 560px) {
+  .blog-post-content iframe {
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .blog-post {

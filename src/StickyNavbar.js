@@ -2,7 +2,7 @@ import React from 'react';
 import './StickyNavbar.css';
 import SearchBar from './searchbar';
 
-const StickyNavbar = ({ isSignedIn, user, onRouteChange, loadUser, signout, onSearchResults }) => {
+const StickyNavbar = ({ isSignedIn, user, onRouteChange, loadUser, signout, onToggleFilters, currentRoute, onSearchResults }) => {
   return (
     <nav className="sticky-navbar">
       <div className="navbar-content">
@@ -29,6 +29,15 @@ const StickyNavbar = ({ isSignedIn, user, onRouteChange, loadUser, signout, onSe
         </div>
         
         <div className="navbar-actions">
+          {currentRoute === 'blogs' && onToggleFilters && (
+            <button 
+              onClick={onToggleFilters} 
+              className="btn btn-filter"
+              title="Toggle filters"
+            >
+              🔍 Filters
+            </button>
+          )}
           {isSignedIn ? (
             <div className="user-section">
               <div className="user-info">

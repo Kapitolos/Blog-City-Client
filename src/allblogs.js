@@ -14,6 +14,7 @@ import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 class AllBlogs extends React.Component {
     constructor(props) {
       super(props);
+      this.filterPanelRef = React.createRef();
       this.state = {
         allblogs: [],
         isLoading: false,
@@ -30,43 +31,39 @@ class AllBlogs extends React.Component {
         totalPosts: 0,
         postsPerPage: 10,
         commentCounts: {}, // Store comment counts for each post
-        selectedCategory: null,
+        selectedCategories: [], // Array of selected category IDs for filtering
         categories: [], // Store all available categories
         showEditModal: false,
-        postToEdit: null
+        postToEdit: null,
+        sortOrder: 'newest', // 'newest' or 'oldest'
+        dateFilter: null, // Date string (YYYY-MM-DD) or null
+        minLikes: null, // Minimum number of likes (number or null)
+        showOnlyFollowed: false, // Show only posts from followed users
+        showFilters: false // Collapsible filter panel state
       }
     }
 
     allblogview = (page = this.state.currentPage) => {
         this.setState({isLoading: true, error: ''});
         
-        // Ensure selectedCategory is a primitive value (number or null)
-        // Safely extract the value, handling any edge cases
-        let categoryId = null;
-        const selectedCategory = this.state.selectedCategory;
-        
-        if (selectedCategory === null || selectedCategory === undefined) {
-          categoryId = null;
-        } else if (typeof selectedCategory === 'number') {
-          categoryId = selectedCategory;
-        } else if (typeof selectedCategory === 'string') {
-          // Try to parse string to number
-          const parsed = parseInt(selectedCategory, 10);
-          categoryId = isNaN(parsed) ? null : parsed;
-        } else {
-          // If it's anything else (object, DOM element, etc.), set to null
-          console.warn('Invalid selectedCategory type, resetting to null:', typeof selectedCategory);
-          categoryId = null;
-          // Also reset the state to prevent future issues
-          this.setState({ selectedCategory: null });
-        }
+        // Handle selectedCategories as an array
+        const selectedCategories = Array.isArray(this.state.selectedCategories) 
+          ? this.state.selectedCategories.filter(id => id != null && !isNaN(parseInt(id, 10)))
+          : [];
         
         // Build request body with only primitive values
         const requestBody = {
           page: typeof page === 'number' ? page : 1,
           limit: typeof this.state.postsPerPage === 'number' ? this.state.postsPerPage : 10,
-          category_id: categoryId
+          category_ids: selectedCategories.length > 0 ? selectedCategories : null,
+          sort_order: this.state.sortOrder || 'newest',
+          date_filter: this.state.dateFilter || null,
+          min_likes: this.state.minLikes !== null && this.state.minLikes !== '' ? parseInt(this.state.minLikes, 10) : null,
+          show_only_followed: this.state.showOnlyFollowed || false,
+          current_user_id: this.props.userId || null
         };
+        
+        console.log('Fetching blogs with request body:', requestBody);
         
         fetch('http://localhost:3001/allblogs', {
           method: 'post',
@@ -218,14 +215,42 @@ class AllBlogs extends React.Component {
         this.fetchCategories();
         // Load blogs - preference will be applied after categories load
         this.allblogview();
+        // Expose toggle method to parent
+        if (this.props.onToggleFiltersReady) {
+            this.props.onToggleFiltersReady(this.toggleFilters);
+        }
+        // Add click outside listener to close filter panel
+        document.addEventListener('mousedown', this.handleClickOutside);
+    }
+
+    componentWillUnmount() {
+        // Remove click outside listener
+        document.removeEventListener('mousedown', this.handleClickOutside);
+    }
+
+    handleClickOutside = (event) => {
+        // Check if click is outside the filter panel and filter button
+        if (this.filterPanelRef.current && 
+            !this.filterPanelRef.current.contains(event.target) &&
+            !event.target.closest('.btn-filter') &&
+            !event.target.closest('.navbar-actions')) {
+            // Close filter panel if it's open
+            if (this.state.showFilters) {
+                this.setState({ showFilters: false });
+            }
+        }
     }
 
     componentDidUpdate(prevProps) {
+        // Expose toggle method to parent if it wasn't available before
+        if (this.props.onToggleFiltersReady && !prevProps.onToggleFiltersReady) {
+            this.props.onToggleFiltersReady(this.toggleFilters);
+        }
         // If userId changed, reload categories and preference
         if (prevProps.userId !== this.props.userId) {
             // If user signed out (userId is now null/undefined), clear the selected category
             if (!this.props.userId) {
-                this.setState({ selectedCategory: null }, () => {
+                this.setState({ selectedCategories: [] }, () => {
                     // Clear the filter and reload
                     this.allblogview(1);
                 });
@@ -307,7 +332,7 @@ class AllBlogs extends React.Component {
     }
 
     handleCategoryFilter = (categoryId) => {
-      // Ensure categoryId is a primitive number, not an event or DOM element
+      // Ensure categoryId is a primitive number
       let id = null;
       
       if (categoryId === null || categoryId === undefined) {
@@ -315,28 +340,84 @@ class AllBlogs extends React.Component {
       } else if (typeof categoryId === 'number') {
         id = categoryId;
       } else if (typeof categoryId === 'string') {
-        // Try to parse string to number
         const parsed = parseInt(categoryId, 10);
         id = isNaN(parsed) ? null : parsed;
       } else {
-        // If it's anything else (object, DOM element, event, etc.), ignore it
         console.warn('Invalid categoryId type in handleCategoryFilter:', typeof categoryId);
         return;
       }
       
-      if (this.state.selectedCategory === id) {
-        // Clear filter
-        this.saveCategoryPreference(null);
-        this.setState({ selectedCategory: null, currentPage: 1 }, () => {
+      if (id === null) {
+        // Clear all filters
+        this.saveCategoryPreference([]);
+        this.setState({ selectedCategories: [], currentPage: 1 }, () => {
           this.allblogview(1);
         });
-      } else {
-        // Apply filter - ensure we're storing a primitive number
-        this.saveCategoryPreference(id);
-        this.setState({ selectedCategory: id, currentPage: 1 }, () => {
-          this.allblogview(1);
-        });
+        return;
       }
+      
+      // Toggle category selection
+      const currentSelected = this.state.selectedCategories || [];
+      let newSelected;
+      
+      if (currentSelected.includes(id)) {
+        // Remove category
+        newSelected = currentSelected.filter(cid => cid !== id);
+      } else {
+        // Add category
+        newSelected = [...currentSelected, id];
+      }
+      
+      this.saveCategoryPreference(newSelected);
+      this.setState({ selectedCategories: newSelected, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    handleSortOrderChange = (sortOrder) => {
+      this.setState({ sortOrder, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    handleDateFilterChange = (dateFilter) => {
+      this.setState({ dateFilter, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    clearDateFilter = () => {
+      this.setState({ dateFilter: null, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    handleMinLikesChange = (minLikes) => {
+      const value = minLikes === '' ? null : parseInt(minLikes, 10);
+      this.setState({ minLikes: value, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    clearLikesFilter = () => {
+      this.setState({ minLikes: null, currentPage: 1 }, () => {
+        this.allblogview(1);
+      });
+    }
+
+    handleShowOnlyFollowedChange = (event) => {
+      const checked = event.target.checked;
+      console.log('Show only followed changed:', checked);
+      this.setState({ showOnlyFollowed: checked, currentPage: 1 }, () => {
+        console.log('State updated, calling allblogview with showOnlyFollowed:', this.state.showOnlyFollowed);
+        this.allblogview(1);
+      });
+    }
+
+    toggleFilters = () => {
+        this.setState(prevState => ({
+            showFilters: !prevState.showFilters
+        }));
     }
 
     render() {
@@ -347,61 +428,160 @@ class AllBlogs extends React.Component {
 
         return (
             <div className="all-blogs-container">
-                <div className="all-blogs-header">
-                    {isSearchMode ? (
-                        <>
-                            <h2>Search Results</h2>
-                            <p>Found {searchResults.length} posts for "{searchTerm}"</p>
-                            <button onClick={this.clearSearch} className="clear-search-btn">
-                                ← Back to All Posts
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <h2>All Blog Posts</h2>
-                            <p>
-                                {totalPosts > 0 ? (
-                                    <>Showing {allblogs.length} of {totalPosts} posts</>
-                                ) : (
-                                    <>Discover what others are writing about</>
-                                )}
-                            </p>
-                        </>
-                    )}
-                </div>
-
-                {/* Category Filter */}
-                {!isSearchMode && (
-                    <div className="category-filter-section">
-                        <div className="category-filter-header">
-                            <span className="category-filter-label">Filter by category:</span>
-                            {this.state.selectedCategory && (
-                                <button 
-                                    className="clear-category-filter"
-                                    onClick={() => this.handleCategoryFilter(null)}
-                                >
-                                    Clear filter
-                                </button>
-                            )}
-                        </div>
-                        <div className="category-filter-options">
-                            {this.state.categories.map(category => (
-                                <button
-                                    key={category.id}
-                                    className={`category-filter-btn ${this.state.selectedCategory === category.id ? 'active' : ''} ${category.user_id ? 'custom-category' : ''}`}
-                                    onClick={() => this.handleCategoryFilter(category.id)}
-                                    style={{
-                                        '--category-color': category.color || '#6a6a6a'
-                                    }}
-                                    title={category.user_id ? 'Community-created category' : ''}
-                                >
-                                    {category.name}
-                                    {category.user_id && <span className="custom-badge">★</span>}
-                                </button>
-                            ))}
-                        </div>
+                {/* Search Results Header (only show when searching) */}
+                {isSearchMode && (
+                    <div className="search-results-header">
+                        <h2>Search Results</h2>
+                        <p>Found {searchResults.length} posts for "{searchTerm}"</p>
+                        <button onClick={this.clearSearch} className="clear-search-btn">
+                            ← Back to All Posts
+                        </button>
                     </div>
                 )}
+
+                {/* Collapsible Filter Panel */}
+                <div 
+                    ref={this.filterPanelRef}
+                    className={`filter-panel ${this.state.showFilters ? 'open' : ''}`}
+                >
+                    <div className="filter-panel-content">
+                        {/* Sort and Filter Controls */}
+                        {!isSearchMode && (
+                            <>
+                                <div className="filter-panel-section">
+                                    <h3 className="filter-panel-title">Sort & Filter</h3>
+                                    <div className="filter-controls-section">
+                        {/* Sort Order */}
+                        <div className="sort-controls">
+                            <label className="sort-label">Sort by:</label>
+                            <div className="sort-buttons">
+                                <button
+                                    className={`sort-btn ${this.state.sortOrder === 'newest' ? 'active' : ''}`}
+                                    onClick={() => this.handleSortOrderChange('newest')}
+                                >
+                                    Newest First
+                                </button>
+                                <button
+                                    className={`sort-btn ${this.state.sortOrder === 'oldest' ? 'active' : ''}`}
+                                    onClick={() => this.handleSortOrderChange('oldest')}
+                                >
+                                    Oldest First
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Date Filter */}
+                        <div className="date-filter-controls">
+                            <label className="date-filter-label" htmlFor="date-filter">
+                                Filter by date:
+                            </label>
+                            <div className="date-input-group">
+                                <input
+                                    type="date"
+                                    id="date-filter"
+                                    className="date-filter-input"
+                                    value={this.state.dateFilter || ''}
+                                    onChange={(e) => this.handleDateFilterChange(e.target.value || null)}
+                                    max={new Date().toISOString().split('T')[0]} // Can't select future dates
+                                />
+                                {this.state.dateFilter && (
+                                    <button
+                                        className="clear-date-filter-btn"
+                                        onClick={this.clearDateFilter}
+                                        title="Clear date filter"
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Likes Filter */}
+                        <div className="likes-filter-controls">
+                            <label className="likes-filter-label" htmlFor="likes-filter">
+                                Minimum likes:
+                            </label>
+                            <div className="likes-input-group">
+                                <input
+                                    type="number"
+                                    id="likes-filter"
+                                    className="likes-filter-input"
+                                    min="0"
+                                    value={this.state.minLikes !== null ? this.state.minLikes : ''}
+                                    onChange={(e) => this.handleMinLikesChange(e.target.value)}
+                                    placeholder="0"
+                                />
+                                {this.state.minLikes !== null && this.state.minLikes !== '' && (
+                                    <button
+                                        className="clear-likes-filter-btn"
+                                        onClick={this.clearLikesFilter}
+                                        title="Clear likes filter"
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Show Only Followed Users Filter */}
+                        {this.props.userId && (
+                          <div className="followed-filter-controls">
+                            <label className="followed-filter-label" htmlFor="followed-filter">
+                              <input
+                                type="checkbox"
+                                id="followed-filter"
+                                className="followed-filter-checkbox"
+                                checked={this.state.showOnlyFollowed}
+                                onChange={this.handleShowOnlyFollowedChange}
+                              />
+                              <span>Show only posts from users I follow</span>
+                            </label>
+                          </div>
+                        )}
+                                    </div>
+                                </div>
+
+                                {/* Category Filter */}
+                                <div className="filter-panel-section">
+                                    <h3 className="filter-panel-title">Categories</h3>
+                                    <div className="category-filter-section">
+                                        <div className="category-filter-header">
+                                            <span className="category-filter-label">Filter by category (select multiple):</span>
+                                            {this.state.selectedCategories && this.state.selectedCategories.length > 0 && (
+                                                <button 
+                                                    className="clear-category-filter"
+                                                    onClick={() => this.handleCategoryFilter(null)}
+                                                >
+                                                    Clear all filters
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className="category-filter-options">
+                                            {this.state.categories.map(category => {
+                                                const isSelected = this.state.selectedCategories && this.state.selectedCategories.includes(category.id);
+                                                return (
+                                                    <button
+                                                        key={category.id}
+                                                        className={`category-filter-btn ${isSelected ? 'active' : ''} ${category.user_id ? 'custom-category' : ''}`}
+                                                        onClick={() => this.handleCategoryFilter(category.id)}
+                                                        style={{
+                                                            '--category-color': category.color || '#6a6a6a'
+                                                        }}
+                                                        title={category.user_id ? 'Community-created category' : ''}
+                                                    >
+                                                        {isSelected && <span className="filter-checkmark">✓</span>}
+                                                        {category.name}
+                                                        {category.user_id && <span className="custom-badge">★</span>}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
 
                 {isLoading && (
                     <div className="blogs-grid">
@@ -635,6 +815,11 @@ class AllBlogs extends React.Component {
                         userId={selectedUser.id}
                         userName={selectedUser.name}
                         onClose={this.closeUserProfile}
+                        currentUserId={this.props.userId}
+                        onUserHidden={(hiddenUserId) => {
+                            // Refresh the blog list to exclude hidden user
+                            this.allblogview(this.state.currentPage);
+                        }}
                     />
                 )}
             </div>

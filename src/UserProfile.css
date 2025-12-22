@@ -58,6 +58,12 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
+.user-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -98,6 +104,88 @@
 .close-button:hover {
   background-color: #f5f5f5;
   color: #dc2626;
+}
+
+/* Follow/Unfollow Buttons */
+.btn-follow,
+.btn-unfollow {
+  padding: 8px 16px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-follow {
+  background: #1a1a1a;
+  color: white;
+  border-color: #1a1a1a;
+}
+
+.btn-follow:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+.btn-unfollow {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  border-color: #e5e5e5;
+}
+
+.btn-unfollow:hover {
+  background: #e5e5e5;
+  border-color: #1a1a1a;
+}
+
+.btn-follow:disabled,
+.btn-unfollow:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Hide/Unhide Buttons */
+.btn-hide,
+.btn-unhide {
+  padding: 8px 16px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-hide {
+  background: #ffffff;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-hide:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.btn-unhide {
+  background: #f5f5f5;
+  color: #1a1a1a;
+  border-color: #e5e5e5;
+}
+
+.btn-unhide:hover {
+  background: #e5e5e5;
+  border-color: #1a1a1a;
+}
+
+.btn-hide:disabled,
+.btn-unhide:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .user-posts-section h4 {
@@ -207,8 +295,27 @@
   color: #1a1a1a;
   font-size: 0.95rem;
   font-weight: 500;
-  line-height: 1.4;
-  flex: 1;
+}
+
+/* Embedded content in user profile posts */
+.user-post-card img,
+.post-modal-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1rem 0;
+  display: block;
+}
+
+.user-post-card iframe,
+.post-modal-content iframe {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  min-height: 250px;
+  border-radius: 4px;
+  margin: 1rem 0;
+  display: block;
 }
 
 .post-date {
@@ -319,6 +426,26 @@
 
 .post-modal-body p {
   margin: 0;
+}
+
+.post-modal-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-modal-body iframe {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  min-height: 315px;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post-modal-footer {

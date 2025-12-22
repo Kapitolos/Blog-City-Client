@@ -1,19 +1,20 @@
 /* Modern All Blogs Styles - Mobile First */
 .all-blogs-container {
+  position: relative;
   padding: 2rem 1rem;
   background: #fafafa;
   min-height: calc(100vh - 200px);
 }
 
-.all-blogs-header {
+/* Search Results Header (only shown when searching) */
+.search-results-header {
   text-align: left;
   margin-bottom: 2rem;
   padding: 0;
   background: transparent;
-  margin-bottom: 2rem;
 }
 
-.all-blogs-header h2 {
+.search-results-header h2 {
   font-size: 2rem;
   font-weight: 600;
   color: #1a1a1a;
@@ -21,11 +22,60 @@
   letter-spacing: -0.02em;
 }
 
-.all-blogs-header p {
+.search-results-header p {
   color: #6a6a6a;
   font-size: 0.95rem;
   margin: 0 0 1rem 0;
   font-weight: 400;
+}
+
+/* Collapsible Filter Panel - Overlay Style */
+.filter-panel {
+  position: fixed;
+  top: 60px; /* Below navbar */
+  left: 0;
+  right: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background: #ffffff;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  margin: 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.filter-panel.open {
+  max-height: 2000px;
+  transition: max-height 0.5s ease-in;
+  border-top: 1px solid #e5e5e5;
+}
+
+.filter-panel-content {
+  padding: 1.5rem;
+}
+
+.filter-panel-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.filter-panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.filter-panel-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
 }
 
 .clear-search-btn {
@@ -59,6 +109,211 @@
 .clear-search-btn:focus-visible {
   outline: 2px solid #1a1a1a;
   outline-offset: 2px;
+}
+
+/* Filter Controls Section (inside filter panel) */
+.filter-controls-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-end;
+}
+
+/* Sort Controls */
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sort-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sort-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  background: white;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-btn:hover {
+  background: #f5f5f5;
+  border-color: #1a1a1a;
+}
+
+.sort-btn.active {
+  background: #1a1a1a;
+  color: white;
+  border-color: #1a1a1a;
+}
+
+/* Date Filter Controls */
+.date-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.date-filter-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.date-filter-input:hover {
+  border-color: #1a1a1a;
+}
+
+.date-filter-input:focus {
+  outline: none;
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.1);
+}
+
+.clear-date-filter-btn {
+  padding: 0.5rem 0.75rem;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  color: #6a6a6a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 36px;
+}
+
+.clear-date-filter-btn:hover {
+  background: #e5e5e5;
+  color: #1a1a1a;
+  border-color: #1a1a1a;
+}
+
+/* Likes Filter Controls */
+.likes-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.likes-filter-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.likes-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.likes-filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  background: white;
+  width: 100px;
+  transition: all 0.2s;
+}
+
+.likes-filter-input:hover {
+  border-color: #1a1a1a;
+}
+
+.likes-filter-input:focus {
+  outline: none;
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.1);
+}
+
+.clear-likes-filter-btn {
+  padding: 0.5rem 0.75rem;
+  background: #f5f5f5;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  color: #6a6a6a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 36px;
+}
+
+.clear-likes-filter-btn:hover {
+  background: #e5e5e5;
+  color: #1a1a1a;
+  border-color: #1a1a1a;
+}
+
+/* Followed Users Filter */
+.followed-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.followed-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  user-select: none;
+}
+
+.followed-filter-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #1a1a1a;
+}
+
+.followed-filter-checkbox:hover {
+  opacity: 0.8;
 }
 
 /* Category Filter Section */
@@ -127,6 +382,13 @@
   background: var(--category-color, #6a6a6a);
   color: white;
   border-color: var(--category-color, #6a6a6a);
+}
+
+.filter-checkmark {
+  display: inline-block;
+  margin-right: 0.25rem;
+  font-weight: bold;
+  font-size: 0.9em;
 }
 
 .category-filter-btn.custom-category {
@@ -396,18 +658,85 @@
 
 .blog-content {
   margin-bottom: 1.5rem;
+  /* Don't hide overflow - we want images and iframes to show */
+  overflow: visible !important;
+  max-height: none !important;
 }
 
+/* Embedded content in blog cards (preview) - always show these */
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  display: block;
+  /* Images should always be visible, not affected by text clamping */
+}
+
+.blog-content iframe {
+  max-width: 100%;
+  width: 100%;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  display: block !important;
+  /* Iframes should always be visible, not affected by text clamping */
+  /* Don't override inline height styles - Bandcamp provides specific heights */
+}
+
+/* Bandcamp iframes - ensure they're visible and respect inline styles */
+.blog-content iframe[seamless],
+.blog-content iframe[src*="bandcamp.com"] {
+  /* Bandcamp iframes use seamless attribute and inline height styles */
+  /* Support all sizes: small (120px), medium (350px), large (472px) */
+  /* CRITICAL: Don't override height - let inline styles from Bandcamp take precedence */
+  min-height: 120px;
+  max-height: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  /* Don't set height here - let the inline style attribute control it */
+}
+
+/* YouTube iframes need aspect ratio */
+.blog-content iframe[src*="youtube.com"],
+.blog-content iframe[src*="youtu.be"] {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 200px;
+}
+
+/* Apply line clamping only to text paragraphs - but only the first few */
 .blog-content p {
   color: #555;
   line-height: 1.6;
-  margin: 0;
+  margin: 0.5rem 0;
+}
+
+/* Ensure iframes and images are never affected by overflow/clamping */
+.blog-content iframe,
+.blog-content img {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Clamp only the first paragraph that doesn't follow an image/iframe */
+.blog-content > p:first-of-type:not(img ~ p):not(iframe ~ p) {
   display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Don't clamp paragraphs that come after images/iframes */
+.blog-content img ~ p,
+.blog-content iframe ~ p {
+  display: block;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  overflow: visible !important;
 }
 
 .blog-card-footer {
@@ -575,6 +904,35 @@
   .blog-card-footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .filter-controls-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .sort-controls,
+  .date-filter-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .sort-buttons {
+    width: 100%;
+  }
+
+  .sort-btn {
+    flex: 1;
+  }
+
+  .date-input-group {
+    width: 100%;
+  }
+
+  .date-filter-input {
+    flex: 1;
   }
 }
 

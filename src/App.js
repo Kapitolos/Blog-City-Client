@@ -19,6 +19,7 @@ class App extends React.Component {
   constructor() {
     super();
     this.allBlogsRef = React.createRef();
+    this.toggleFiltersRef = null;
     this.state = {
       headerdiv: "hidden",
       input: '',
@@ -131,9 +132,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:3001')
-      .then(response => response.json())
-      .then(console.log)
+    // Removed test fetch - was causing JSON parse error
   }
 
   onRouteChange = (route) => {
@@ -170,7 +169,13 @@ class App extends React.Component {
           onRouteChange={this.onRouteChange}
           loadUser={this.loadUser}
           signout={this.signout}
+          currentRoute={this.state.route}
           onSearchResults={this.handleSearchResults}
+          onToggleFilters={() => {
+            if (this.toggleFiltersRef) {
+              this.toggleFiltersRef();
+            }
+          }}
         />
         
         <div className="container">
@@ -264,6 +269,9 @@ class App extends React.Component {
                   userId={this.state.user.id}
                   userName={this.state.user.name}
                   showToast={this.showToast}
+                  onToggleFiltersReady={(toggleFn) => {
+                    this.toggleFiltersRef = toggleFn;
+                  }}
                 />
               </div>
             </div>
