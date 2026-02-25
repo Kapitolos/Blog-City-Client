@@ -4,6 +4,7 @@ import LoadingSkeleton from './components/LoadingSkeleton.js';
 import EditPostModal from './components/EditPostModal.js';
 import ConfirmDialog from './components/ConfirmDialog.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
 import { API_BASE_URL } from './config.js';
 
 class OldPosts extends React.Component {
@@ -186,12 +187,12 @@ class OldPosts extends React.Component {
                 <div 
                   className="user-post-preview"
                   dangerouslySetInnerHTML={{ 
-                    __html: post.postbody ? 
+                    __html: fixPostBodyImageUrls(post.postbody ? 
                       (post.postbody.length > 100 ? 
                         post.postbody.substring(0, 100) + '...' : 
                         post.postbody
                       ) : 
-                      '<p>No content available</p>'
+                      '<p>No content available</p>')
                   }}
                 />
                 <div className="user-post-actions">

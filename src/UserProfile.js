@@ -3,6 +3,7 @@ import './UserProfile.css';
 import LoadingSkeleton from './components/LoadingSkeleton.js';
 import Avatar from './components/Avatar.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
 import { API_BASE_URL } from './config.js';
 
 const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden }) => {
@@ -256,9 +257,9 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
                 <div 
                   className="post-preview"
                   dangerouslySetInnerHTML={{ 
-                    __html: post.postbody ? 
+                    __html: fixPostBodyImageUrls(post.postbody ? 
                       (post.postbody.length > 120 ? `${post.postbody.substring(0, 120)}...` : post.postbody) 
-                      : '<p>No content available</p>'
+                      : '<p>No content available</p>')
                   }}
                 />
               </div>
@@ -289,7 +290,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
             
             <div 
               className="post-modal-body"
-              dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+              dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(selectedPost.postbody) }}
             />
             
             <div className="post-modal-footer">

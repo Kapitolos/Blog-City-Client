@@ -1,6 +1,7 @@
 import React from 'react';
 import './BlogPostModal.css';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
 
 class BlogPostModal extends React.Component {
   constructor(props) {
@@ -53,7 +54,7 @@ class BlogPostModal extends React.Component {
           
           <div 
             className="blog-modal-body"
-            dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+            dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(selectedPost.postbody) }}
           />
           
           <div className="blog-modal-footer">

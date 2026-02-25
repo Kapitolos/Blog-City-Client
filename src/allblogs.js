@@ -10,6 +10,7 @@ import CategoryTag from './components/CategoryTag.js';
 import Avatar from './components/Avatar.js';
 import EditPostModal from './components/EditPostModal.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
 import { API_BASE_URL } from './config.js';
 
 class AllBlogs extends React.Component {
@@ -668,7 +669,7 @@ class AllBlogs extends React.Component {
                                 )}
                                 <div 
                                   className="blog-content"
-                                  dangerouslySetInnerHTML={{ __html: blog.postbody || '<p>No content available</p>' }}
+                                  dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(blog.postbody) || '<p>No content available</p>' }}
                                 />
                                 <div className="blog-card-footer">
                                     <div className="blog-footer-left">
@@ -767,7 +768,7 @@ class AllBlogs extends React.Component {
                             
                             <div 
                               className="blog-modal-body"
-                              dangerouslySetInnerHTML={{ __html: selectedPost.postbody }}
+                              dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(selectedPost.postbody) }}
                             />
                             
                             <CommentsSection
