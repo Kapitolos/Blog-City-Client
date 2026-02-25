@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Avatar.css';
+import { API_BASE_URL } from '../config.js';
 
 const Avatar = ({ userId, userName, size = 'medium', showUpload = false, onUpload }) => {
   const [avatarUrl, setAvatarUrl] = useState(null);
@@ -8,11 +9,11 @@ const Avatar = ({ userId, userName, size = 'medium', showUpload = false, onUploa
 
   useEffect(() => {
     if (userId) {
-      fetch(`http://localhost:3001/avatar/${userId}`)
+      fetch(`${API_BASE_URL}/avatar/${userId}`)
         .then(response => response.json())
         .then(data => {
           if (data.avatar_url) {
-            setAvatarUrl(`http://localhost:3001${data.avatar_url}`);
+            setAvatarUrl(`${API_BASE_URL}${data.avatar_url}`);
           }
         })
         .catch(err => {
@@ -43,7 +44,7 @@ const Avatar = ({ userId, userName, size = 'medium', showUpload = false, onUploa
     formData.append('avatar', file);
     formData.append('user_id', userId);
 
-    fetch('http://localhost:3001/upload-avatar', {
+    fetch(`${API_BASE_URL}/upload-avatar`, {
       method: 'POST',
       body: formData
     })
@@ -56,7 +57,7 @@ const Avatar = ({ userId, userName, size = 'medium', showUpload = false, onUploa
         return response.json();
       })
       .then(data => {
-        setAvatarUrl(`http://localhost:3001${data.url}`);
+        setAvatarUrl(`${API_BASE_URL}${data.url}`);
         setIsUploading(false);
         if (onUpload) {
           onUpload(data.url);

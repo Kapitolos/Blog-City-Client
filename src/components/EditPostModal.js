@@ -1,5 +1,6 @@
 import React from 'react';
 import './EditPostModal.css';
+import { API_BASE_URL } from '../config.js';
 import RichTextEditor from './RichTextEditor.js';
 
 class EditPostModal extends React.Component {
@@ -70,7 +71,7 @@ class EditPostModal extends React.Component {
 
     this.setState({ isSaving: true, error: '' });
 
-    fetch(`http://localhost:3001/blogpost/${this.props.post.id}`, {
+    fetch(`${API_BASE_URL}/blogpost/${this.props.post.id}`, {
       method: 'put',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

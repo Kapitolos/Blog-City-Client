@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./searchbar.css";
+import { API_BASE_URL } from './config.js';
 
 const SearchBar = ({ onSearchResults }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +40,7 @@ const SearchBar = ({ onSearchResults }) => {
     setIsLoading(true);
     setError("");
 
-    fetch(`http://localhost:3001/search?q=${encodeURIComponent(searchTerm.trim())}`)
+    fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(searchTerm.trim())}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Search failed: ${res.status}`);

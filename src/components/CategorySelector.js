@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CategorySelector.css';
+import { API_BASE_URL } from '../config.js';
 
 const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3, userId }) => {
   const [categories, setCategories] = useState([]);
@@ -11,7 +12,7 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
 
   useEffect(() => {
     // All categories are public, so no need to pass userId
-    fetch('http://localhost:3001/categories')
+    fetch(`${API_BASE_URL}/categories`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch categories');
@@ -56,7 +57,7 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
     
     setIsCreatingCategory(true);
     
-    fetch('http://localhost:3001/categories', {
+    fetch(`${API_BASE_URL}/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -73,7 +74,7 @@ const CategorySelector = ({ selectedCategories = [], onChange, maxSelections = 3
         setIsCreatingCategory(false);
       } else {
         // Refresh categories list
-        fetch('http://localhost:3001/categories')
+        fetch(`${API_BASE_URL}/categories`)
           .then(response => response.json())
           .then(data => {
             setCategories(Array.isArray(data) ? data : []);

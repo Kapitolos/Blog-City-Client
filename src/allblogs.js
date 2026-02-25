@@ -10,6 +10,7 @@ import CategoryTag from './components/CategoryTag.js';
 import Avatar from './components/Avatar.js';
 import EditPostModal from './components/EditPostModal.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { API_BASE_URL } from './config.js';
 
 class AllBlogs extends React.Component {
     constructor(props) {
@@ -65,7 +66,7 @@ class AllBlogs extends React.Component {
         
         console.log('Fetching blogs with request body:', requestBody);
         
-        fetch('http://localhost:3001/allblogs', {
+        fetch(`${API_BASE_URL}/allblogs`, {
           method: 'post',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(requestBody)
@@ -118,7 +119,7 @@ class AllBlogs extends React.Component {
     fetchCommentCounts = (blogs) => {
       // Fetch comment counts for all posts in parallel
       const countPromises = blogs.map(blog => 
-        fetch(`http://localhost:3001/comments/${blog.id}/count`)
+        fetch(`${API_BASE_URL}/comments/${blog.id}/count`)
           .then(response => response.json())
           .then(data => ({ postId: blog.id, count: data.commentCount || 0 }))
           .catch(() => ({ postId: blog.id, count: 0 }))
@@ -266,7 +267,7 @@ class AllBlogs extends React.Component {
     saveCategoryPreference = (categoryId) => {
         const { userId } = this.props;
         if (userId) {
-            fetch(`http://localhost:3001/user-preference/${userId}`, {
+            fetch(`${API_BASE_URL}/user-preference/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ preferred_category_id: categoryId })
@@ -287,7 +288,7 @@ class AllBlogs extends React.Component {
     loadCategoryPreference = () => {
         const { userId } = this.props;
         if (userId) {
-            return fetch(`http://localhost:3001/user-preference/${userId}`)
+            return fetch(`${API_BASE_URL}/user-preference/${userId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -313,7 +314,7 @@ class AllBlogs extends React.Component {
 
     fetchCategories = () => {
       // All categories are public, so no need to pass userId
-      fetch('http://localhost:3001/categories')
+      fetch(`${API_BASE_URL}/categories`)
         .then(response => response.json())
         .then(data => {
           this.setState({ categories: data || [] }, () => {

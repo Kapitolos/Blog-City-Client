@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CommentsSection.css';
+import { API_BASE_URL } from '../config.js';
 import CommentForm from './CommentForm.js';
 import CommentList from './CommentList.js';
 
@@ -12,7 +13,7 @@ const CommentsSection = ({ postId, userId, userName, onCommentCountChange }) => 
     setIsLoading(true);
     setError('');
 
-    fetch(`http://localhost:3001/comments/${postId}`)
+    fetch(`${API_BASE_URL}/comments/${postId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch comments');

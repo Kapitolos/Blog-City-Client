@@ -1,5 +1,6 @@
 import React from 'react';
 import './register.css';
+import { API_BASE_URL } from './config.js';
 
 class Register extends React.Component {
   constructor(props) {
@@ -58,7 +59,7 @@ class Register extends React.Component {
 
     this.setState({isLoading: true, error: ''});
     
-    fetch('http://localhost:3001/register', {
+    fetch(`${API_BASE_URL}/register`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

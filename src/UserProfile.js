@@ -3,6 +3,7 @@ import './UserProfile.css';
 import LoadingSkeleton from './components/LoadingSkeleton.js';
 import Avatar from './components/Avatar.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { API_BASE_URL } from './config.js';
 
 const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -27,7 +28,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
     if (!currentUserId) return;
     
     setIsLoadingStatus(true);
-    fetch(`http://localhost:3001/follow-status/${userId}?currentUserId=${currentUserId}`)
+    fetch(`${API_BASE_URL}/follow-status/${userId}?currentUserId=${currentUserId}`)
       .then(response => response.json())
       .then(data => {
         setIsFollowing(data.isFollowing || false);
@@ -44,7 +45,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
     setIsLoading(true);
     setError('');
     
-    fetch(`http://localhost:3001/user-posts/${userId}`)
+    fetch(`${API_BASE_URL}/user-posts/${userId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to fetch posts: ${response.status}`);
@@ -75,7 +76,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
   const handleFollow = () => {
     if (!currentUserId) return;
     
-    fetch(`http://localhost:3001/follow/${userId}`, {
+    fetch(`${API_BASE_URL}/follow/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentUserId })
@@ -94,7 +95,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
   const handleUnfollow = () => {
     if (!currentUserId) return;
     
-    fetch(`http://localhost:3001/follow/${userId}`, {
+    fetch(`${API_BASE_URL}/follow/${userId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentUserId })
@@ -113,7 +114,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
   const handleHide = () => {
     if (!currentUserId) return;
     
-    fetch(`http://localhost:3001/hide-user/${userId}`, {
+    fetch(`${API_BASE_URL}/hide-user/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentUserId })
@@ -135,7 +136,7 @@ const UserProfile = ({ userId, userName, onClose, currentUserId, onUserHidden })
   const handleUnhide = () => {
     if (!currentUserId) return;
     
-    fetch(`http://localhost:3001/hide-user/${userId}`, {
+    fetch(`${API_BASE_URL}/hide-user/${userId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentUserId })

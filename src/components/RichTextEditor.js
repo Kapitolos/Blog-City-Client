@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './RichTextEditor.css';
+import { API_BASE_URL } from '../config.js';
 
 const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) => {
   const [charCount, setCharCount] = useState(0);
@@ -73,7 +74,7 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
     formData.append('image', file);
 
     try {
-      const response = await fetch('http://localhost:3001/upload-image', {
+      const response = await fetch(`${API_BASE_URL}/upload-image`, {
         method: 'POST',
         body: formData
       });
@@ -84,7 +85,7 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
       }
 
       const data = await response.json();
-      const imageUrl = `http://localhost:3001${data.url}`;
+      const imageUrl = `${API_BASE_URL}${data.url}`;
       const imageHtml = `<img src="${imageUrl}" alt="Uploaded image" style="max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0;" />`;
       
       insertAtCursor(imageHtml);

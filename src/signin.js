@@ -1,5 +1,6 @@
 import React from 'react';
 import './signin.css';
+import { API_BASE_URL } from './config.js';
 
 class Signin extends React.Component {
   constructor(props) {
@@ -33,7 +34,7 @@ class Signin extends React.Component {
 
     this.setState({isLoading: true, error: ''});
     
-    fetch('http://localhost:3001/signin', {
+    fetch(`${API_BASE_URL}/signin`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

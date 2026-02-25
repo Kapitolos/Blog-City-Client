@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './CommentForm.css';
+import { API_BASE_URL } from '../config.js';
 
 const CommentForm = ({ postId, userId, userName, onSubmit, onCancel }) => {
   const [commentText, setCommentText] = useState('');
@@ -22,7 +23,7 @@ const CommentForm = ({ postId, userId, userName, onSubmit, onCancel }) => {
     setIsSubmitting(true);
     setError('');
 
-    fetch('http://localhost:3001/comment', {
+    fetch(`${API_BASE_URL}/comment`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

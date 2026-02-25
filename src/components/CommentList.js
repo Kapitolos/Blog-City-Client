@@ -3,6 +3,7 @@ import './CommentList.css';
 import ConfirmDialog from './ConfirmDialog.js';
 import Avatar from './Avatar.js';
 import { formatRelativeTime, formatDate } from '../utils/dateUtils.js';
+import { API_BASE_URL } from '../config.js';
 
 const CommentList = ({ comments, currentUserId, onDelete }) => {
   const [deletingCommentId, setDeletingCommentId] = useState(null);
@@ -23,7 +24,7 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
   const confirmDelete = () => {
     if (!deletingCommentId) return;
 
-    fetch(`http://localhost:3001/comment/${deletingCommentId}?user_id=${currentUserId}`, {
+    fetch(`${API_BASE_URL}/comment/${deletingCommentId}?user_id=${currentUserId}`, {
       method: 'delete',
       headers: { 'Content-Type': 'application/json' }
     })

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LikeButton.css';
+import { API_BASE_URL } from '../config.js';
 
 const LikeButton = ({ postId, userId, initialLikeCount = 0, initialIsLiked = false, onLikeChange }) => {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
@@ -10,7 +11,7 @@ const LikeButton = ({ postId, userId, initialLikeCount = 0, initialIsLiked = fal
   // Fetch initial like status if userId is provided
   useEffect(() => {
     if (postId && userId && !isInitialized) {
-      fetch(`http://localhost:3001/likes/${postId}?user_id=${userId}`)
+      fetch(`${API_BASE_URL}/likes/${postId}?user_id=${userId}`)
         .then(response => response.json())
         .then(data => {
           setLikeCount(data.likeCount || 0);
@@ -23,7 +24,7 @@ const LikeButton = ({ postId, userId, initialLikeCount = 0, initialIsLiked = fal
         });
     } else if (postId && !userId) {
       // If no user, just fetch count
-      fetch(`http://localhost:3001/likes/${postId}`)
+      fetch(`${API_BASE_URL}/likes/${postId}`)
         .then(response => response.json())
         .then(data => {
           setLikeCount(data.likeCount || 0);
@@ -50,7 +51,7 @@ const LikeButton = ({ postId, userId, initialLikeCount = 0, initialIsLiked = fal
 
     setIsLoading(true);
     
-    fetch(`http://localhost:3001/like/${postId}`, {
+    fetch(`${API_BASE_URL}/like/${postId}`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })

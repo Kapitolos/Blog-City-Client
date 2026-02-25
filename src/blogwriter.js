@@ -1,5 +1,6 @@
 import React from 'react';
 import './blogwriter.css';
+import { API_BASE_URL } from './config.js';
 import CategorySelector from './components/CategorySelector.js';
 import RichTextEditor from './components/RichTextEditor.js';
 
@@ -82,7 +83,7 @@ class BlogWriter extends React.Component {
 
     console.log('Request body being sent:', requestBody);
 
-    fetch('http://localhost:3001/blogpost', {
+    fetch(`${API_BASE_URL}/blogpost`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(requestBody)

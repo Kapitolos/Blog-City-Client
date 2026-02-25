@@ -4,6 +4,7 @@ import LoadingSkeleton from './components/LoadingSkeleton.js';
 import EditPostModal from './components/EditPostModal.js';
 import ConfirmDialog from './components/ConfirmDialog.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
+import { API_BASE_URL } from './config.js';
 
 class OldPosts extends React.Component {
   constructor(props) {
@@ -20,7 +21,7 @@ class OldPosts extends React.Component {
   showoldposts = () => {
     this.setState({isLoading: true, error: ''});
     
-    fetch('http://localhost:3001/getposts', {
+    fetch(`${API_BASE_URL}/getposts`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -101,7 +102,7 @@ class OldPosts extends React.Component {
 
     this.setState({ isLoading: true });
 
-    fetch(`http://localhost:3001/blogpost/${deletingPost.id}?user_id=${this.props.id}`, {
+    fetch(`${API_BASE_URL}/blogpost/${deletingPost.id}?user_id=${this.props.id}`, {
       method: 'delete',
       headers: { 'Content-Type': 'application/json' }
     })
