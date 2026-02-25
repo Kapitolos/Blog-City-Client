@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/Blog-City-Client/static/css/main.24f5c3e3.chunk.css",
+    "main.js": "/Blog-City-Client/static/js/main.cd4097bf.chunk.js",
+    "main.js.map": "/Blog-City-Client/static/js/main.cd4097bf.chunk.js.map",
+    "runtime-main.js": "/Blog-City-Client/static/js/runtime-main.0dcab0ba.js",
+    "runtime-main.js.map": "/Blog-City-Client/static/js/runtime-main.0dcab0ba.js.map",
+    "static/js/2.70f4e3a7.chunk.js": "/Blog-City-Client/static/js/2.70f4e3a7.chunk.js",
+    "static/js/2.70f4e3a7.chunk.js.map": "/Blog-City-Client/static/js/2.70f4e3a7.chunk.js.map",
+    "static/js/3.b53d3393.chunk.js": "/Blog-City-Client/static/js/3.b53d3393.chunk.js",
+    "static/js/3.b53d3393.chunk.js.map": "/Blog-City-Client/static/js/3.b53d3393.chunk.js.map",
+    "index.html": "/Blog-City-Client/index.html",
+    "static/css/main.24f5c3e3.chunk.css.map": "/Blog-City-Client/static/css/main.24f5c3e3.chunk.css.map",
+    "static/js/2.70f4e3a7.chunk.js.LICENSE.txt": "/Blog-City-Client/static/js/2.70f4e3a7.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0dcab0ba.js",
+    "static/js/2.70f4e3a7.chunk.js",
+    "static/css/main.24f5c3e3.chunk.css",
+    "static/js/main.cd4097bf.chunk.js"
+  ]
+}

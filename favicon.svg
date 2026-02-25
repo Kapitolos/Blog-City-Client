@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#1a1a1a" rx="4"/>
+  <!-- Pencil -->
+  <path fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+    d="M8 22 L10 24 L22 12 L20 10 L8 22 Z M10 24 L6 26 L4 24 L10 24 Z M20 10 L22 12 L24 10 L22 8 L20 10 Z"/>
+</svg>
