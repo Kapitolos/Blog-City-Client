@@ -317,7 +317,8 @@ class AllBlogs extends React.Component {
       fetch(`${API_BASE_URL}/categories`)
         .then(response => response.json())
         .then(data => {
-          this.setState({ categories: data || [] }, () => {
+          const list = Array.isArray(data) ? data : [];
+          this.setState({ categories: list }, () => {
             // After categories are loaded, load and apply saved preference
             if (this.props.userId) {
               this.loadCategoryPreference().then(() => {
@@ -329,6 +330,7 @@ class AllBlogs extends React.Component {
         })
         .catch(err => {
           console.error('Error fetching categories:', err);
+          this.setState({ categories: [] });
         });
     }
 
@@ -558,7 +560,7 @@ class AllBlogs extends React.Component {
                                             )}
                                         </div>
                                         <div className="category-filter-options">
-                                            {this.state.categories.map(category => {
+                                            {(Array.isArray(this.state.categories) ? this.state.categories : []).map(category => {
                                                 const isSelected = this.state.selectedCategories && this.state.selectedCategories.includes(category.id);
                                                 return (
                                                     <button

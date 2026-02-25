@@ -211,7 +211,6 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
       const bandcampMatch = bandcampUrl.match(/https?:\/\/([^/]+\.bandcamp\.com)\/(album|track)\/([^/?]+)/);
       
       if (bandcampMatch) {
-        const [, domain, type, name] = bandcampMatch;
         alert('Please use the embed URL from Bandcamp. Click "Share / Embed" on the Bandcamp page and copy the embed URL or iframe code.');
         return;
       } else {

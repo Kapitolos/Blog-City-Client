@@ -110,7 +110,7 @@ class EditPostModal extends React.Component {
   }
 
   render() {
-    const { post, onClose } = this.props;
+    const { onClose } = this.props;
     const { posttitle, postbody, isSaving, error } = this.state;
     const titleCharCount = posttitle.length;
     // Get plain text length for character count

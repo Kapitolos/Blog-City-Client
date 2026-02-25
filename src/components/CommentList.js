@@ -53,8 +53,6 @@ const CommentList = ({ comments, currentUserId, onDelete }) => {
     setDeletingCommentId(null);
   };
 
-  const deletingComment = comments.find(c => c.id === deletingCommentId);
-
   return (
     <div className="comment-list">
       {comments.map((comment) => (

@@ -40,6 +40,7 @@ const CommentsSection = ({ postId, userId, userName, onCommentCountChange }) => 
     if (postId) {
       fetchComments();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
   const handleCommentSubmit = (newComment) => {
