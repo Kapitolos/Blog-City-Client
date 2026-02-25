@@ -9,6 +9,8 @@ class Register extends React.Component {
       email: '',
       password: '',
       name: '',
+      agreedToGuidelines: false,
+      showGuidelines: false,
       isLoading: false,
       error: '',
       validationErrors: {}
@@ -46,6 +48,10 @@ class Register extends React.Component {
       errors.password = 'Password is required';
     } else if (this.state.password.length < 6) {
       errors.password = 'Password must be at least 6 characters long';
+    }
+    
+    if (!this.state.agreedToGuidelines) {
+      errors.guidelines = 'You must agree to the Community Guidelines to register';
     }
     
     this.setState({ validationErrors: errors });
@@ -174,6 +180,25 @@ class Register extends React.Component {
               <div className="password-requirements">
                 Password must be at least 6 characters long
               </div>
+            </div>
+
+            <div className="form-group form-group-checkbox">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={this.state.agreedToGuidelines}
+                  onChange={(e) => this.setState({ agreedToGuidelines: e.target.checked, validationErrors: {} })}
+                />
+                <span>I agree to the <button type="button" className="link-button-inline" onClick={() => this.setState({ showGuidelines: !this.state.showGuidelines })}>Community Guidelines</button></span>
+              </label>
+              {this.state.showGuidelines && (
+                <div className="guidelines-text">
+                  Be respectful. No spam, harassment, hate speech, or inappropriate content. Report violations using the Report button. We may remove content or accounts that break these guidelines.
+                </div>
+              )}
+              {validationErrors.guidelines && (
+                <div className="validation-error">{validationErrors.guidelines}</div>
+              )}
             </div>
 
             <button

@@ -5,6 +5,7 @@ import EditPostModal from './components/EditPostModal.js';
 import ConfirmDialog from './components/ConfirmDialog.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
+import PostBody from './components/PostBody.js';
 import { API_BASE_URL } from './config.js';
 
 class OldPosts extends React.Component {
@@ -184,16 +185,14 @@ class OldPosts extends React.Component {
                     </span>
                   )}
                 </div>
-                <div 
+                <PostBody
+                  html={fixPostBodyImageUrls(post.postbody ? 
+                    (post.postbody.length > 100 ? 
+                      post.postbody.substring(0, 100) + '...' : 
+                      post.postbody
+                    ) : 
+                    '<p>No content available</p>')}
                   className="user-post-preview"
-                  dangerouslySetInnerHTML={{ 
-                    __html: fixPostBodyImageUrls(post.postbody ? 
-                      (post.postbody.length > 100 ? 
-                        post.postbody.substring(0, 100) + '...' : 
-                        post.postbody
-                      ) : 
-                      '<p>No content available</p>')
-                  }}
                 />
                 <div className="user-post-actions">
                   <button

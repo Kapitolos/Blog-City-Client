@@ -2,6 +2,7 @@ import React from 'react';
 import './post.css';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
+import PostBody from './components/PostBody.js';
 
 class Post extends React.Component {
   constructor(props) {
@@ -32,9 +33,9 @@ class Post extends React.Component {
           </div>
         </div>
         
-        <div 
+        <PostBody
+          html={fixPostBodyImageUrls(postbody)}
           className="blog-post-content"
-          dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(postbody) }}
         />
       </div>
     );

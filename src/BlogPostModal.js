@@ -2,6 +2,7 @@ import React from 'react';
 import './BlogPostModal.css';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
+import PostBody from './components/PostBody.js';
 
 class BlogPostModal extends React.Component {
   constructor(props) {
@@ -52,9 +53,9 @@ class BlogPostModal extends React.Component {
             )}
           </div>
           
-          <div 
+          <PostBody
+            html={fixPostBodyImageUrls(selectedPost.postbody)}
             className="blog-modal-body"
-            dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(selectedPost.postbody) }}
           />
           
           <div className="blog-modal-footer">

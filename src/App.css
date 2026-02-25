@@ -443,6 +443,18 @@ body {
 }
 
 
+/* Fallback when post image fails to load (e.g. 404 on ephemeral hosting) */
+.post-image-unavailable {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #666;
+  background: #f0f0f0;
+  border-radius: 4px;
+  border: 1px dashed #ccc;
+}
+
 /* Focus States for Accessibility */
 .btn:focus-visible,
 .nav-buttons button:focus-visible {

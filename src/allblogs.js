@@ -9,8 +9,10 @@ import CommentsSection from './components/CommentsSection.js';
 import CategoryTag from './components/CategoryTag.js';
 import Avatar from './components/Avatar.js';
 import EditPostModal from './components/EditPostModal.js';
+import ReportModal from './components/ReportModal.js';
 import { formatRelativeTime, formatDate } from './utils/dateUtils.js';
 import { fixPostBodyImageUrls } from './utils/postBodyHtml.js';
+import PostBody from './components/PostBody.js';
 import { API_BASE_URL } from './config.js';
 
 class AllBlogs extends React.Component {
@@ -41,9 +43,13 @@ class AllBlogs extends React.Component {
         dateFilter: null, // Date string (YYYY-MM-DD) or null
         minLikes: null, // Minimum number of likes (number or null)
         showOnlyFollowed: false, // Show only posts from followed users
-        showFilters: false // Collapsible filter panel state
+        showFilters: false, // Collapsible filter panel state
+        showReportModal: false
       }
     }
+
+    openReportModal = () => this.setState({ showReportModal: true });
+    closeReportModal = () => this.setState({ showReportModal: false });
 
     allblogview = (page = this.state.currentPage) => {
         this.setState({isLoading: true, error: ''});
@@ -667,9 +673,9 @@ class AllBlogs extends React.Component {
                                         ))}
                                     </div>
                                 )}
-                                <div 
+                                <PostBody
+                                  html={fixPostBodyImageUrls(blog.postbody) || '<p>No content available</p>'}
                                   className="blog-content"
-                                  dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(blog.postbody) || '<p>No content available</p>' }}
                                 />
                                 <div className="blog-card-footer">
                                     <div className="blog-footer-left">
@@ -766,9 +772,9 @@ class AllBlogs extends React.Component {
                                 </div>
                             )}
                             
-                            <div 
+                            <PostBody
+                              html={fixPostBodyImageUrls(selectedPost.postbody)}
                               className="blog-modal-body"
-                              dangerouslySetInnerHTML={{ __html: fixPostBodyImageUrls(selectedPost.postbody) }}
                             />
                             
                             <CommentsSection
@@ -794,12 +800,31 @@ class AllBlogs extends React.Component {
                                         ✏️ Edit Post
                                     </button>
                                 )}
+                                {this.props.userId && selectedPost.user_id !== this.props.userId && (
+                                    <button
+                                        type="button"
+                                        className="report-btn"
+                                        onClick={this.openReportModal}
+                                    >
+                                        Report
+                                    </button>
+                                )}
                                 <button className="blog-modal-close-btn" onClick={this.closeBlogModal}>
                                     Close
                                 </button>
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Report Modal */}
+                {this.state.showReportModal && this.state.selectedPost && (
+                    <ReportModal
+                        blogId={this.state.selectedPost.id}
+                        reporterId={this.props.userId}
+                        onClose={this.closeReportModal}
+                        onSubmitted={() => this.props.showToast && this.props.showToast('Report submitted. Thank you.', 'success')}
+                    />
                 )}
 
                 {/* Edit Post Modal */}

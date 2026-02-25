@@ -10,6 +10,10 @@ const CommentsSection = ({ postId, userId, userName, onCommentCountChange }) => 
   const [error, setError] = useState('');
 
   const fetchComments = () => {
+    if (!postId) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setError('');
 
@@ -18,13 +22,21 @@ const CommentsSection = ({ postId, userId, userName, onCommentCountChange }) => 
         if (!response.ok) {
           throw new Error('Failed to fetch comments');
         }
-        return response.json();
+        return response.text();
       })
-      .then(data => {
-        setComments(data || []);
+      .then(text => {
+        let data = [];
+        if (text && text.trim()) {
+          try {
+            const parsed = JSON.parse(text);
+            data = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            data = [];
+          }
+        }
+        setComments(data);
+        setError('');
         setIsLoading(false);
-        
-        // Notify parent of comment count change
         if (onCommentCountChange) {
           onCommentCountChange(data.length);
         }
@@ -37,9 +49,13 @@ const CommentsSection = ({ postId, userId, userName, onCommentCountChange }) => 
   };
 
   useEffect(() => {
-    if (postId) {
-      fetchComments();
+    if (!postId) {
+      setComments([]);
+      setError('');
+      setIsLoading(false);
+      return;
     }
+    fetchComments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
