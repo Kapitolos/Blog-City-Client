@@ -366,7 +366,7 @@ body {
   border: 1px solid #f5c6cb;
 }
 
-/* Mobile Responsiveness */
+/* Mobile Responsiveness - single column: write post first, then sidebar (profile + previous posts) */
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr;
@@ -375,11 +375,11 @@ body {
   
   .sidebar {
     position: static;
-    order: -1;
+    order: 1;
   }
   
   .content-area {
-    order: 1;
+    order: -1;
   }
 }
 

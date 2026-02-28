@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './RichTextEditor.css';
-import { API_BASE_URL } from '../config.js';
 
 const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) => {
   const [charCount, setCharCount] = useState(0);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showImageUrlDialog, setShowImageUrlDialog] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
   const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
   const [showBandcampDialog, setShowBandcampDialog] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [bandcampUrl, setBandcampUrl] = useState('');
   const textareaRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     // Update character count when value changes
@@ -53,52 +52,20 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
     }, 0);
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+  const handleInsertImageFromUrl = () => {
+    const url = imageUrl.trim();
+    if (!url) {
+      alert('Please enter an image URL');
       return;
     }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
+    if (!/^https?:\/\//i.test(url)) {
+      alert('URL must start with http:// or https://');
       return;
     }
-
-    setIsUploadingImage(true);
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/upload-image`, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to upload image');
-      }
-
-      const data = await response.json();
-      const imageUrl = `${API_BASE_URL}${data.url}`;
-      const imageHtml = `<img src="${imageUrl}" alt="Uploaded image" style="max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0;" />`;
-      
-      insertAtCursor(imageHtml);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      alert(error.message || 'Failed to upload image');
-    } finally {
-      setIsUploadingImage(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
+    const imageHtml = `<img src="${url.replace(/"/g, '&quot;')}" alt="Image" style="max-width: 100%; height: auto; border-radius: 4px; margin: 1rem 0;" />`;
+    insertAtCursor(imageHtml);
+    setShowImageUrlDialog(false);
+    setImageUrl('');
   };
 
   const handleYouTubeEmbed = () => {
@@ -267,19 +234,11 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
         <button
           type="button"
           className="toolbar-btn"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploadingImage}
-          title="Upload image"
+          onClick={() => setShowImageUrlDialog(true)}
+          title="Insert image from URL"
         >
-          {isUploadingImage ? '⏳ Uploading...' : '🖼️ Insert Image'}
+          🖼️ Insert Image
         </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ display: 'none' }}
-        />
         <button
           type="button"
           className="toolbar-btn"
@@ -297,6 +256,60 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
           🎵 Embed Bandcamp
         </button>
       </div>
+
+      {showImageUrlDialog && (
+        <div className="youtube-dialog-overlay" onClick={() => setShowImageUrlDialog(false)}>
+          <div className="youtube-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="youtube-dialog-header">
+              <h3>Insert Image from URL</h3>
+              <button
+                type="button"
+                className="youtube-dialog-close"
+                onClick={() => {
+                  setShowImageUrlDialog(false);
+                  setImageUrl('');
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="youtube-dialog-content">
+              <p>Paste the image URL (e.g. from Imgur, your own hosting, or any direct image link):</p>
+              <input
+                type="url"
+                className="youtube-url-input"
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleInsertImageFromUrl();
+                  }
+                }}
+              />
+              <div className="youtube-dialog-actions">
+                <button
+                  type="button"
+                  className="youtube-dialog-btn primary"
+                  onClick={handleInsertImageFromUrl}
+                >
+                  Insert Image
+                </button>
+                <button
+                  type="button"
+                  className="youtube-dialog-btn"
+                  onClick={() => {
+                    setShowImageUrlDialog(false);
+                    setImageUrl('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showYouTubeDialog && (
         <div className="youtube-dialog-overlay" onClick={() => setShowYouTubeDialog(false)}>
@@ -410,7 +423,7 @@ const RichTextEditor = ({ value, onChange, placeholder, maxLength, rows = 12 }) 
         className="rich-text-editor-textarea"
         value={value || ''}
         onChange={handleChange}
-        placeholder={placeholder || 'Write your content here... You can insert images and YouTube videos using the toolbar buttons above.'}
+        placeholder={placeholder || 'Write your content here... Use the toolbar to insert images from a URL and embed YouTube or Bandcamp.'}
         maxLength={maxLength}
         rows={rows}
       />

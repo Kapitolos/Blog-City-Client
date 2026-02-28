@@ -192,12 +192,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Design - Mobile only */
+/* Responsive Design - Mobile only: smaller navbar and buttons */
 @media (max-width: 768px) {
   .navbar-content {
     flex-direction: column;
-    gap: 8px;
-    padding: 6px 16px 8px;
+    gap: 6px;
+    padding: 4px 14px 6px;
   }
   
   .navbar-search {
@@ -220,18 +220,26 @@
   }
   
   .navbar-brand h2 {
-    font-size: 18px;
+    font-size: 17px;
   }
   
   .user-section {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     text-align: center;
     width: 100%;
   }
   
   .user-info {
     align-items: center;
+  }
+  
+  .user-name {
+    font-size: 13px;
+  }
+  
+  .user-id {
+    font-size: 11px;
   }
   
   .auth-buttons {
@@ -247,22 +255,27 @@
   .btn {
     flex: 1;
     max-width: 120px;
+    padding: 5px 12px;
+    font-size: 13px;
+    min-height: 32px;
   }
 }
 
 @media (max-width: 480px) {
   .navbar-content {
-    padding: 4px 12px 6px;
+    padding: 3px 12px 5px;
+    gap: 5px;
   }
   
   .navbar-brand h2 {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .btn {
-    padding: 6px 12px;
+    padding: 4px 10px;
     font-size: 12px;
-    min-width: 70px;
+    min-width: 64px;
+    min-height: 28px;
   }
 }
 
